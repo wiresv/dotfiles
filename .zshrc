@@ -1,5 +1,5 @@
 # zsh prompt: user@host:~$ 
-PROMPT="%F{blue}%n%F{black}@%F{magenta}%m%F{black}:%F{green}%~%F{black}$ "
+PROMPT="%F{blue}%n%f@%F{magenta}%m%f:%F{green}%~%f$ "
 
 # environment vars
 export EDITOR=vim
@@ -24,7 +24,7 @@ alias zconf="code ~/.zshrc"
 alias ls="eza -bhlF --no-user --no-permissions --no-time --group-directories-first"
 alias sl="eza -bhlF --no-user --no-permissions --no-time --group-directories-first"
 alias lsa="eza -abhlF --no-user --no-permissions --no-time --group-directories-first"
-export BAT_THEME="GitHub"
+export BAT_THEME="ansi"
 alias cat="bat"
 alias bat="batcat"
 alias atop="sudo asitop --color 7"
@@ -36,7 +36,7 @@ alias gitd="git diff"
 alias gitc="git commit"
 alias gitp="git push"
 alias gitpu="git pull"
-alias glg="git log --graph --pretty=format:'%C(blue)%h %ad%C(auto)%d %C(black)%s' --abbrev=4 --all --date=format:'%y-%m-%d %H:%M'"
+alias glg="git log --graph --pretty=format:'%C(blue)%h %ad%C(auto)%d %C(white)%s' --abbrev=4 --all --date=format:'%y-%m-%d %H:%M'"
 
 # rust
 alias car="cargo run"
