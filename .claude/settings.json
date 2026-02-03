@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/wuser/.claude/play-notification.sh"
+            "command": "/home/w/.claude/play-notification.sh"
           }
         ]
       }
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/wuser/.claude/play-notification.sh"
+            "command": "/home/w/.claude/play-notification.sh"
           }
         ]
       }
