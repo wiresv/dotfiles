@@ -1,7 +1,6 @@
 ---
 name: commit
 description: Analyze recent git changes, stage them, and commit with a precise message.
-allowed-tools: Bash, Read, Grep, Glob
 ---
 
 You are creating a git commit. Follow these steps:
