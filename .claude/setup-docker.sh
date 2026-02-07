@@ -30,7 +30,7 @@ docker create -it \
   --restart unless-stopped \
   --network host \
   --tmpfs /tmp:exec,size=2g \
-  -w /app \
+  -w /root \
   "${IMAGE_NAME}:latest"
 
 echo "Starting ${CONTAINER_NAME}..."

@@ -17,8 +17,7 @@ git checkout -B main origin/main
 ### 2. Install all required apt packages
 
 ```
-source ~/.zshrc
-aptsetup
+source ~/.zshrc && aptsetup
 ```
 
 This runs `~/.config/scripts/apt-setup.sh` which installs everything the dotfiles depend on, including packages that need external repos (like eza).

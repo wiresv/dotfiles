@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
 RUN npm install -g @anthropic-ai/claude-code
 
 # 3. Set working directory
-WORKDIR /app
+WORKDIR /root
 
 # 4. Set the ENV variable so scripts/terminals know zsh is the default
 ENV SHELL=/bin/zsh
