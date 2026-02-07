@@ -80,4 +80,4 @@ alias echopath="echo '$PATH' | tr ':' '\n'"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # Claude Code docker container
-alias devcon="docker exec -it claude-dev zsh"
+devcon() { docker exec -it "claude-dev-${1:-1}" zsh; }

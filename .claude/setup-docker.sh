@@ -1,11 +1,11 @@
 #!/bin/bash
 # Setup persistent Claude Code Docker container for WSL
-# Run this on a fresh WSL install after Docker is available.
+# Each run creates a new uniquely numbered container, never overwriting existing ones.
 
 set -euo pipefail
 
 IMAGE_NAME="claude-code-env"
-CONTAINER_NAME="claude-dev"
+CONTAINER_PREFIX="claude-dev"
 DOCKERFILE_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Build image if it doesn't exist
@@ -16,27 +16,24 @@ else
   echo "Image ${IMAGE_NAME}:latest already exists, skipping build."
 fi
 
-# Create container if it doesn't exist
-if docker ps -a --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"; then
-  echo "Container ${CONTAINER_NAME} already exists."
-else
-  echo "Creating ${CONTAINER_NAME} container..."
-  docker create -it \
-    --name "${CONTAINER_NAME}" \
-    --restart unless-stopped \
-    --network host \
-    --tmpfs /tmp:exec,size=2g \
-    -v "${HOME}:${HOME}" \
-    -w "${HOME}" \
-    "${IMAGE_NAME}:latest"
-fi
+# Find the next available ID
+LAST_ID=$(docker ps -a --format '{{.Names}}' \
+  | grep -oP "^${CONTAINER_PREFIX}-\K[0-9]+" \
+  | sort -n | tail -1 || true)
+NEXT_ID=$(( ${LAST_ID:-0} + 1 ))
+CONTAINER_NAME="${CONTAINER_PREFIX}-${NEXT_ID}"
 
-# Start container if not running
-if ! docker ps --format '{{.Names}}' | grep -qx "${CONTAINER_NAME}"; then
-  echo "Starting ${CONTAINER_NAME}..."
-  docker start "${CONTAINER_NAME}"
-else
-  echo "${CONTAINER_NAME} is already running."
-fi
+# Create and start the new container
+echo "Creating ${CONTAINER_NAME}..."
+docker create -it \
+  --name "${CONTAINER_NAME}" \
+  --restart unless-stopped \
+  --network host \
+  --tmpfs /tmp:exec,size=2g \
+  -w /app \
+  "${IMAGE_NAME}:latest"
+
+echo "Starting ${CONTAINER_NAME}..."
+docker start "${CONTAINER_NAME}"
 
 echo "Done. Use: docker exec -it ${CONTAINER_NAME} zsh"
