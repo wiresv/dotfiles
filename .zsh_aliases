@@ -1,3 +1,6 @@
+# sudo wrapper: use sudo if available, otherwise run directly
+_sudo() { if command -v sudo &>/dev/null; then sudo "$@"; else "$@"; fi }
+
 # shell
 alias c="clear"
 alias cd..="cd .."
@@ -7,7 +10,7 @@ alias sl="eza -bhlF --no-user --no-permissions --no-time --group-directories-fir
 alias lsa="eza -abhlF --no-user --no-permissions --no-time --group-directories-first"
 alias cat="bat"
 alias bat="batcat"
-alias atop="sudo asitop --color 7"
+alias atop="_sudo asitop --color 7"
 
 # git
 alias gits="git status"
@@ -28,7 +31,7 @@ alias brewbundle="brew bundle -f dump"
 alias brewup="brew update && brew upgrade"
 
 # apt
-alias aptup="sudo apt update && sudo apt upgrade"
+alias aptup="_sudo apt update && _sudo apt upgrade"
 alias aptsetup="bash ~/.config/scripts/apt-setup.sh"
 
 # bun
@@ -45,5 +48,6 @@ alias tmka="tmux kill-server"
 # echo PATH formatted (must be sourced after PATH is fully set)
 alias echopath="echo '$PATH' | tr ':' '\n'"
 
-# Claude Code docker container
+# Claude Code
+alias ccd="claude --dangerously-skip-permissions"
 devcon() { docker exec -it "claude-dev-${1:-1}" zsh; }
