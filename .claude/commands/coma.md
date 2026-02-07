@@ -1,1 +1,0 @@
-Analye the changes with git recently made in this directory, `git add .` them, and then git commit them with a diligent commit message. Do not include "Co-Authored-By: Claude <noreply@anthropic.com>" at the end of the commit message.
