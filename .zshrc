@@ -51,6 +51,7 @@ alias brewup="brew update && brew upgrade"
 
 # apt
 alias aptup="sudo apt update && sudo apt upgrade"
+alias aptsetup="bash ~/.config/scripts/apt-setup.sh"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
