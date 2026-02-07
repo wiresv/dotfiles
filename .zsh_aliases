@@ -1,0 +1,49 @@
+# shell
+alias c="clear"
+alias cd..="cd .."
+alias zconf="code ~/.zshrc"
+alias ls="eza -bhlF --no-user --no-permissions --no-time --group-directories-first"
+alias sl="eza -bhlF --no-user --no-permissions --no-time --group-directories-first"
+alias lsa="eza -abhlF --no-user --no-permissions --no-time --group-directories-first"
+alias cat="bat"
+alias bat="batcat"
+alias atop="sudo asitop --color 7"
+
+# git
+alias gits="git status"
+alias gita="git add ."
+alias gitd="git diff"
+alias gitc="git commit"
+alias gitp="git push"
+alias gitpu="git pull"
+alias glg="git log --graph --pretty=format:'%C(blue)%h %ad%C(auto)%d %C(white)%s' --abbrev=4 --all --date=format:'%y-%m-%d %H:%M'"
+
+# python
+alias py="python3"
+alias python="python3"
+alias pip="pip3"
+
+# homebrew
+alias brewbundle="brew bundle -f dump"
+alias brewup="brew update && brew upgrade"
+
+# apt
+alias aptup="sudo apt update && sudo apt upgrade"
+alias aptsetup="bash ~/.config/scripts/apt-setup.sh"
+
+# bun
+alias brd="bun run dev"
+alias brdo="bun run dev -- --open"
+alias brb="bun run build"
+
+# tmux
+alias tmls="tmux list-sessions"
+alias tmdev="script -c tmux /dev/null"
+alias tma="tmux attach"
+alias tmka="tmux kill-server"
+
+# echo PATH formatted (must be sourced after PATH is fully set)
+alias echopath="echo '$PATH' | tr ':' '\n'"
+
+# Claude Code docker container
+devcon() { docker exec -it "claude-dev-${1:-1}" zsh; }
