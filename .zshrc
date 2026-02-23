@@ -10,12 +10,6 @@ export TMUX_GTA=20000
 export BROWSER=wslview
 export BAT_THEME="ansi"
 
-# Fix terminal dimensions for tmux/WSL/Windows Terminal
-if [[ -n "$TMUX" ]]; then
-    eval $(resize)
-fi
-trap 'eval $(resize)' WINCH
-
 # python
 export PATH="`python3 -m site --user-base`/bin:$PATH"
 
