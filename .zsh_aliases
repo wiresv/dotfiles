@@ -51,7 +51,7 @@ alias echopath="echo '$PATH' | tr ':' '\n'"
 # Claude Code
 alias ccd="claude --dangerously-skip-permissions"
 devcon() {
-  local n="${1:-1}" name="claude-dev-${1:-1}"
+  local n="${1:-1}" name="claude-dev-${1:-1}" port=$((2200 + ${1:-1}))
   if ! docker ps -a --format '{{.Names}}' | grep -qx "$name"; then
     echo "Creating $name..."
     docker create -it --name "$name" --hostname "devcon${n}" --restart unless-stopped \
@@ -60,5 +60,7 @@ devcon() {
   if [ "$(docker inspect -f '{{.State.Running}}' "$name")" != "true" ]; then
     docker start "$name"
   fi
+  # Ensure SSH is running on the container's assigned port
+  docker exec "$name" bash /root/.claude/setup-ssh.sh "$port" 2>/dev/null || true
   docker exec -it "$name" zsh
 }
