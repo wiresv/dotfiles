@@ -50,4 +50,15 @@ alias echopath="echo '$PATH' | tr ':' '\n'"
 
 # Claude Code
 alias ccd="claude --dangerously-skip-permissions"
-devcon() { docker exec -it "claude-dev-${1:-1}" zsh; }
+devcon() {
+  local n="${1:-1}" name="claude-dev-${1:-1}"
+  if ! docker ps -a --format '{{.Names}}' | grep -qx "$name"; then
+    echo "Creating $name..."
+    docker create -it --name "$name" --hostname "devcon${n}" --restart unless-stopped \
+      --network host --tmpfs /tmp:exec,size=2g -w /root claude-code-env:latest
+  fi
+  if [ "$(docker inspect -f '{{.State.Running}}' "$name")" != "true" ]; then
+    docker start "$name"
+  fi
+  docker exec -it "$name" zsh
+}

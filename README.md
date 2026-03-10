@@ -23,10 +23,17 @@ aptsetup
 
 This runs `~/.config/scripts/apt-setup.sh` which installs everything the dotfiles depend on, including packages that need external repos (like eza).
 
-### 3. Set up the Claude Code Docker container (optional)
+### 3. Set up Claude Code Docker containers (optional)
 
 ```
 bash ~/.claude/setup-docker.sh
 ```
 
-Each run creates a new numbered container (`claude-dev-1`, `claude-dev-2`, ...) without touching existing ones. Enter a container with `devcon` or `devcon 2`.
+This builds the `claude-code-env` Docker image. Once built, use `devcon {N}` to create and enter containers:
+
+```
+devcon 1   # creates claude-dev-1 if it doesn't exist, then enters it
+devcon 2   # creates claude-dev-2 if it doesn't exist, then enters it
+```
+
+Each container gets a hostname matching its index (e.g. `devcon1`, `devcon2`) so the shell prompt shows which container you're in.
