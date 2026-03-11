@@ -71,5 +71,14 @@
     "type": "command",
     "command": "input=$(cat); cd \"$(echo \"$input\" | jq -r '.workspace.current_dir')\" 2>/dev/null; added=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{added+=$1} END {printf \"%d\", added+0}'); removed=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{removed+=$2} END {printf \"%d\", removed+0}'); commits=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --oneline 2>/dev/null | wc -l | tr -d ' '); printf \"\\033[34m+${added}\\033[0m/\\033[33m-${removed}\\033[0m \\033[32m+${commits}\\033[0m\""
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  }
 }
