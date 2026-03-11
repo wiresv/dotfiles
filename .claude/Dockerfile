@@ -7,16 +7,21 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     zsh \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Install Claude Code globally
 RUN npm install -g @anthropic-ai/claude-code
 
-# 3. Set working directory
+# 3. Copy SSH setup script
+COPY setup-ssh.sh /root/.claude/setup-ssh.sh
+RUN chmod +x /root/.claude/setup-ssh.sh
+
+# 4. Set working directory
 WORKDIR /root
 
-# 4. Set the ENV variable so scripts/terminals know zsh is the default
+# 5. Set the ENV variable so scripts/terminals know zsh is the default
 ENV SHELL=/bin/zsh
 
-# 5. Default entrypoint drops you into zsh
+# 6. Default entrypoint drops you into zsh
 CMD ["zsh"]
