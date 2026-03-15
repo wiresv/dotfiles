@@ -4,8 +4,13 @@
   "permissions": {
     "allow": [
       "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)",
       "WebFetch(domain:*)",
-      "Read(*)"
+      "WebSearch(*)"
     ],
     "deny": [
       "Bash(rm -rf *)",
@@ -80,5 +85,6 @@
     }
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "medium"
 }
