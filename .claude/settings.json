@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/w/.claude/play-notification.sh"
+            "command": "$HOME/.claude/play-notification.sh"
           }
         ]
       }
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/w/.claude/play-notification.sh"
+            "command": "$HOME/.claude/play-notification.sh"
           }
         ]
       }
@@ -74,7 +74,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "input=$(cat); cd \"$(echo \"$input\" | jq -r '.workspace.current_dir')\" 2>/dev/null; added=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{added+=$1} END {printf \"%d\", added+0}'); removed=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{removed+=$2} END {printf \"%d\", removed+0}'); commits=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --oneline 2>/dev/null | wc -l | tr -d ' '); printf \"\\033[34m+${added}\\033[0m/\\033[33m-${removed}\\033[0m \\033[32m+${commits}\\033[0m\""
+    "command": "input=$(cat); cwd=$(echo \"$input\" | grep -o '\"current_dir\":\"[^\"]*\"' | head -1 | sed 's/\"current_dir\":\"//;s/\"$//'); model=$(echo \"$input\" | grep -o '\"display_name\":\"[^\"]*\"' | head -1 | sed 's/\"display_name\":\"//;s/\"$//'); home=$(echo ~); short_cwd=$(echo \"$cwd\" | sed \"s|^$home|~|\"); cd \"$cwd\" 2>/dev/null; added=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{added+=$1} END {printf \"%d\", added+0}'); removed=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --pretty=format: --numstat 2>/dev/null | awk '{removed+=$2} END {printf \"%d\", removed+0}'); commits=$(git log --since=\"$(date +%Y-%m-%d) 00:00:00\" --until=\"$(date +%Y-%m-%d) 23:59:59\" --oneline 2>/dev/null | wc -l | tr -d ' '); printf \"\\033[34m%s\\033[0m@\\033[35m%s\\033[0m:\\033[32m%s\\033[0m \\033[34m+${added}\\033[0m/\\033[33m-${removed}\\033[0m \\033[32m${commits}c\\033[0m \\033[2m${model}\\033[0m\" \"$(whoami)\" \"$(hostname -s)\" \"$short_cwd\""
   },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -84,7 +84,8 @@
       }
     }
   },
+  "syntaxHighlightingDisabled": false,
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "medium"
+  "effortLevel": "medium",
+  "skipDangerousModePermissionPrompt": true
 }
