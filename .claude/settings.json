@@ -9,7 +9,9 @@
       "Write(*)",
       "Glob(*)",
       "Grep(*)",
+      "Fetch(*)",
       "WebFetch(domain:*)",
+      "WebFetch(*)",
       "WebSearch(*)"
     ],
     "deny": [
