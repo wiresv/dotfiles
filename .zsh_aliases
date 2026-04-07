@@ -67,3 +67,5 @@ devcon() {
   docker exec "$name" bash /root/.claude/setup-ssh.sh "$port" 2>/dev/null || true
   docker exec -it "$name" zsh
 }
+
+alias senv="source .venv/bin/activate"
