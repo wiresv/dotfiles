@@ -22,7 +22,7 @@ alias gitd="git diff"
 alias gitc="git commit"
 alias gitp="git push"
 alias gitpu="git pull"
-alias glg="git log --graph --pretty=format:'%C(blue)%h %ad%C(auto)%d %C(black)%s' --abbrev=4 --all --date=format:'%y-%m-%d %H:%M'"
+alias glg="git log --graph --pretty=format:'%C(blue)%h %C(black)%ad%C(magenta)%d %C(brightblack)%s' --abbrev=4 --all --date=format:'%y-%m-%d %H:%M'"
 
 # python
 alias py="python3"
