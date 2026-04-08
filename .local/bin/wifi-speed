@@ -35,6 +35,33 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Show progress only when not in log-only mode and stderr is a TTY.
+PROGRESS=0
+if [[ $LOG_ONLY == 0 && -t 2 ]]; then PROGRESS=1; fi
+
+# spin_while <pid> <label>
+# Renders a braille spinner with elapsed seconds on stderr until the given
+# background pid exits, then leaves a single ✓ line in its place. Falls back
+# to plain `wait` when progress is disabled.
+spin_while() {
+  local pid="$1" label="$2"
+  if [[ $PROGRESS == 0 ]]; then
+    wait "$pid"
+    return $?
+  fi
+  local frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+  local start=$SECONDS i=0
+  while kill -0 "$pid" 2>/dev/null; do
+    printf '\r\033[K%s %s  (%ds)' "${frames[$((i%10))]}" "$label" "$((SECONDS-start))" >&2
+    i=$((i+1))
+    sleep 0.1
+  done
+  wait "$pid"
+  local rc=$?
+  printf '\r\033[K✓ %s  (%ds)\n' "$label" "$((SECONDS-start))" >&2
+  return $rc
+}
+
 if [[ $SHOW == 1 ]]; then
   if [[ ! -f "$LOG_FILE" ]]; then
     echo "no log yet at $LOG_FILE" >&2
@@ -84,14 +111,20 @@ WIFI=$(valid_json_or_null "$WIFI")
 
 # --- one test pass ---------------------------------------------------------
 run_networkquality() {
-  /usr/bin/networkquality -c -I "$IFACE" 2>/dev/null \
-    | jq -c '{
-        download_mbps:   (((.dl_throughput // 0) / 1000000) | (.*100|round)/100),
-        upload_mbps:     (((.ul_throughput // 0) / 1000000) | (.*100|round)/100),
-        responsiveness:  ((.responsiveness // null) | if . == null then null else round end),
-        idle_latency_ms: ((.base_rtt // null) | if . == null then null else (.*10|round)/10 end)
-      }' \
-    || echo 'null'
+  local out
+  out=$(mktemp -t wifispeed.XXXXXX)
+  (
+    /usr/bin/networkquality -c -I "$IFACE" 2>/dev/null \
+      | jq -c '{
+          download_mbps:   (((.dl_throughput // 0) / 1000000) | (.*100|round)/100),
+          upload_mbps:     (((.ul_throughput // 0) / 1000000) | (.*100|round)/100),
+          responsiveness:  ((.responsiveness // null) | if . == null then null else round end),
+          idle_latency_ms: ((.base_rtt // null) | if . == null then null else (.*10|round)/10 end)
+        }' >"$out" 2>/dev/null || echo 'null' >"$out"
+  ) &
+  spin_while "$!" "Apple networkquality" || true
+  cat "$out"
+  rm -f "$out"
 }
 
 run_cloudflare() {
@@ -106,15 +139,25 @@ run_cloudflare() {
   trap 'rm -f "$upfile"' RETURN
   dd if=/dev/urandom of="$upfile" bs=1m count=25 status=none
 
-  dl_out=$(curl -sS -o /dev/null \
+  local curl_progress
+  if [[ $PROGRESS == 1 ]]; then
+    curl_progress=(--progress-bar)
+  else
+    curl_progress=(-sS)
+  fi
+
+  [[ $PROGRESS == 1 ]] && printf '→ Cloudflare download (25 MB)\n' >&2
+  dl_out=$(curl "${curl_progress[@]}" -o /dev/null \
     -w '%{size_download} %{time_total}' \
-    "https://speed.cloudflare.com/__down?bytes=$dl_req" 2>/dev/null \
+    "https://speed.cloudflare.com/__down?bytes=$dl_req" \
     || echo "0 0")
-  ul_out=$(curl -sS -o /dev/null \
+
+  [[ $PROGRESS == 1 ]] && printf '→ Cloudflare upload (25 MB)\n' >&2
+  ul_out=$(curl "${curl_progress[@]}" -o /dev/null \
     -w '%{size_upload} %{time_total}' \
     -X POST -H "Content-Type: application/octet-stream" \
     --data-binary "@$upfile" \
-    "https://speed.cloudflare.com/__up" 2>/dev/null \
+    "https://speed.cloudflare.com/__up" \
     || echo "0 0")
   # Latency: tiny request, subtract TLS-done time from first-byte time —
   # that's the single-RTT request/response, excluding TCP+TLS handshake.
@@ -152,13 +195,24 @@ run_netflix() {
     echo 'null'; return
   fi
   # fast --json --upload prints e.g. {"downloadSpeed":540,"uploadSpeed":480,"downloaded":...,"unit":"Mbps"}
-  fast --upload --json 2>/dev/null || echo 'null'
+  local out
+  out=$(mktemp -t wifispeed.XXXXXX)
+  ( fast --upload --json >"$out" 2>/dev/null || echo 'null' >"$out" ) &
+  spin_while "$!" "Netflix fast.com" || true
+  cat "$out"
+  rm -f "$out"
 }
 
 # --- collect N runs --------------------------------------------------------
+if [[ $PROGRESS == 1 ]]; then
+  SSID=$(jq -r '.ssid // "?"' <<<"$WIFI")
+  printf 'wifi-speed: starting (iface %s, SSID %s, %d run%s)\n' \
+    "$IFACE" "$SSID" "$N" "$([[ $N -gt 1 ]] && echo s)" >&2
+fi
+
 NQ_RUNS='[]'; CF_RUNS='[]'; NF_RUNS='[]'
 for ((i=1; i<=N; i++)); do
-  [[ $LOG_ONLY == 0 && $N -gt 1 ]] && echo "run $i/$N..." >&2
+  [[ $PROGRESS == 1 && $N -gt 1 ]] && printf '\n── run %d/%d ──\n' "$i" "$N" >&2
   NQ=$(valid_json_or_null "$(run_networkquality)")
   CF=$(valid_json_or_null "$(run_cloudflare)")
   NF=$(valid_json_or_null "$(run_netflix)")
