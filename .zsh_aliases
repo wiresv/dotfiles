@@ -69,3 +69,4 @@ devcon() {
 }
 
 alias senv="source .venv/bin/activate"
+alias qs="quantsharp"
