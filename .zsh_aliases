@@ -37,6 +37,9 @@ alias brewup="brew update && brew upgrade"
 alias aptup="_sudo apt update && _sudo apt upgrade"
 alias aptsetup="bash ~/.config/scripts/apt-setup.sh"
 
+# mac
+alias macsetup="bash ~/.config/scripts/mac-setup.sh"
+
 # bun
 alias brd="bun run dev"
 alias brdo="bun run dev -- --open"

@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+# wifi-speed — measure WiFi/internet speed against multiple representative
+# endpoints (Apple networkquality, Cloudflare, Netflix Open Connect) and log
+# results as JSONL for historical comparison.
+#
+# Plan: ~/.claude/plans/giggly-mapping-narwhal.md
+
+set -euo pipefail
+
+LOG_DIR="$HOME/.local/share/wifi-speed"
+LOG_FILE="$LOG_DIR/log.jsonl"
+mkdir -p "$LOG_DIR"
+
+N=1
+LOG_ONLY=0
+SHOW=0
+
+usage() {
+  cat <<'EOF'
+usage: wifi-speed [-n N] [--log-only] [--show]
+  -n N         run each test N times, report the median
+  --log-only   suppress pretty output, just append JSONL
+  --show       print the last 10 entries from the log and exit
+  -h, --help   this help
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n) N="$2"; shift 2 ;;
+    --log-only) LOG_ONLY=1; shift ;;
+    --show) SHOW=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; usage; exit 2 ;;
+  esac
+done
+
+if [[ $SHOW == 1 ]]; then
+  if [[ ! -f "$LOG_FILE" ]]; then
+    echo "no log yet at $LOG_FILE" >&2
+    exit 1
+  fi
+  tail -n 10 "$LOG_FILE" | jq -r '
+    [
+      .timestamp,
+      (.wifi.ssid // "?"),
+      "↓\(.cloudflare.download_mbps // "?")/↑\(.cloudflare.upload_mbps // "?") cf",
+      "↓\(.netflix.downloadSpeed // "?")/↑\(.netflix.uploadSpeed // "?") nf",
+      "rpm \(.networkquality.responsiveness // "?")"
+    ] | @tsv
+  ' | column -t -s $'\t'
+  exit 0
+fi
+
+valid_json_or_null() {
+  jq -ec . <<<"$1" >/dev/null 2>&1 && printf '%s' "$1" || printf 'null'
+}
+
+# --- detect active interface ----------------------------------------------
+IFACE=$(route get default 2>/dev/null | awk '/interface:/ {print $2}')
+if [[ -z "${IFACE:-}" ]]; then
+  echo "could not detect default interface" >&2
+  exit 1
+fi
+
+# --- WiFi context ----------------------------------------------------------
+WIFI=$(system_profiler SPAirPortDataType -json 2>/dev/null | jq -c '
+  [ .SPAirPortDataType[0].spairport_airport_interfaces[]
+    | .spairport_current_network_information as $n
+    | select($n != null and ($n._name // null) != null)
+    | ($n.spairport_signal_noise // "") as $sn
+    | {
+      ssid:    ($n._name // null),
+      channel: ($n.spairport_network_channel // null),
+      phymode: ($n.spairport_network_phymode // null),
+      tx_rate_mbps: ($n.spairport_network_rate // null),
+      rssi_dbm:  ($sn | capture("(?<r>-?\\d+) dBm").r? // null | tonumber? // null),
+      noise_dbm: ($sn | capture("/ (?<n>-?\\d+) dBm").n? // null | tonumber? // null),
+      signal_noise_raw: ($sn | if . == "" then null else . end)
+    }
+  ] | (.[0] // null)
+' || echo 'null')
+WIFI=$(valid_json_or_null "$WIFI")
+
+# --- one test pass ---------------------------------------------------------
+run_networkquality() {
+  /usr/bin/networkquality -c -I "$IFACE" 2>/dev/null \
+    | jq -c '{
+        download_mbps:   (((.dl_throughput // 0) / 1000000) | (.*100|round)/100),
+        upload_mbps:     (((.ul_throughput // 0) / 1000000) | (.*100|round)/100),
+        responsiveness:  ((.responsiveness // null) | if . == null then null else round end),
+        idle_latency_ms: ((.base_rtt // null) | if . == null then null else (.*10|round)/10 end)
+      }' \
+    || echo 'null'
+}
+
+run_cloudflare() {
+  # 100 MB down, 25 MB up. Use actual bytes-transferred from curl, not the
+  # requested size — Cloudflare may cap or compress, so trusting "bytes=X"
+  # gives wildly inflated numbers (10 Gbps on a home link).
+  # Upload uses a real file (not a pipe) so curl can set Content-Length —
+  # Cloudflare's __up endpoint rejects chunked transfer encoding with 403.
+  local dl_req=26214400  # 25 MB — Cloudflare rejects much larger
+  local upfile dl_out ul_out lat_ms
+  upfile=$(mktemp -t wifispeed.XXXXXX)
+  trap 'rm -f "$upfile"' RETURN
+  dd if=/dev/urandom of="$upfile" bs=1m count=25 status=none
+
+  dl_out=$(curl -sS -o /dev/null \
+    -w '%{size_download} %{time_total}' \
+    "https://speed.cloudflare.com/__down?bytes=$dl_req" 2>/dev/null \
+    || echo "0 0")
+  ul_out=$(curl -sS -o /dev/null \
+    -w '%{size_upload} %{time_total}' \
+    -X POST -H "Content-Type: application/octet-stream" \
+    --data-binary "@$upfile" \
+    "https://speed.cloudflare.com/__up" 2>/dev/null \
+    || echo "0 0")
+  # Latency: tiny request, subtract TLS-done time from first-byte time —
+  # that's the single-RTT request/response, excluding TCP+TLS handshake.
+  lat_ms=$(curl -sS -o /dev/null \
+    -w '%{time_starttransfer} %{time_appconnect}' \
+    "https://speed.cloudflare.com/__down?bytes=10" 2>/dev/null \
+    | awk '{ if ($2+0 > 0 && $1+0 > $2+0) printf "%d", ($1-$2)*1000; else print 0 }')
+  rm -f "$upfile"
+
+  local dl_bytes dl_time ul_bytes ul_time
+  read -r dl_bytes dl_time <<<"$dl_out"
+  read -r ul_bytes ul_time <<<"$ul_out"
+  [[ "$dl_bytes" =~ ^[0-9]+$ ]]      || dl_bytes=0
+  [[ "$dl_time"  =~ ^[0-9.]+$ ]]     || dl_time=0
+  [[ "$ul_bytes" =~ ^[0-9]+$ ]]      || ul_bytes=0
+  [[ "$ul_time"  =~ ^[0-9.]+$ ]]     || ul_time=0
+  [[ "$lat_ms"   =~ ^-?[0-9]+$ ]]    || lat_ms=0
+
+  jq -nc \
+    --arg dlb "$dl_bytes" --arg dlt "$dl_time" \
+    --arg ulb "$ul_bytes" --arg ult "$ul_time" \
+    --arg lat "$lat_ms" '
+      def mbps($b; $t): if ($t|tonumber) > 0
+        then ((($b|tonumber) * 8) / (($t|tonumber) * 1000000) | (.*100|round)/100)
+        else null end;
+      {
+        download_mbps: mbps($dlb; $dlt),
+        upload_mbps:   mbps($ulb; $ult),
+        latency_ms:    ($lat|tonumber)
+      }'
+}
+
+run_netflix() {
+  if ! command -v fast >/dev/null 2>&1; then
+    echo 'null'; return
+  fi
+  # fast --json --upload prints e.g. {"downloadSpeed":540,"uploadSpeed":480,"downloaded":...,"unit":"Mbps"}
+  fast --upload --json 2>/dev/null || echo 'null'
+}
+
+# --- collect N runs --------------------------------------------------------
+NQ_RUNS='[]'; CF_RUNS='[]'; NF_RUNS='[]'
+for ((i=1; i<=N; i++)); do
+  [[ $LOG_ONLY == 0 && $N -gt 1 ]] && echo "run $i/$N..." >&2
+  NQ=$(valid_json_or_null "$(run_networkquality)")
+  CF=$(valid_json_or_null "$(run_cloudflare)")
+  NF=$(valid_json_or_null "$(run_netflix)")
+  NQ_RUNS=$(jq -c --argjson x "$NQ" '. + [$x]' <<<"$NQ_RUNS")
+  CF_RUNS=$(jq -c --argjson x "$CF" '. + [$x]' <<<"$CF_RUNS")
+  NF_RUNS=$(jq -c --argjson x "$NF" '. + [$x]' <<<"$NF_RUNS")
+done
+
+# Median across runs (per field). For N=1 this is just the single value.
+median_obj() {
+  jq -c '
+    def med(f): map(f) | map(select(. != null and . != "")) | sort
+                | if length == 0 then null
+                  else .[((length-1)/2)|floor] end;
+    if length == 0 then null
+    else (.[0] // {}) | to_entries
+         | map(.key as $k | {key:$k, value: ($runs | med(.[$k]))})
+         | from_entries
+    end
+  ' --argjson runs "$1" <<<"$1"
+}
+
+NQ_MED=$(median_obj "$NQ_RUNS")
+CF_MED=$(median_obj "$CF_RUNS")
+NF_MED=$(median_obj "$NF_RUNS")
+
+# --- assemble record -------------------------------------------------------
+TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+REC=$(jq -nc \
+  --arg ts "$TS" \
+  --arg iface "$IFACE" \
+  --arg n "$N" \
+  --argjson wifi "$WIFI" \
+  --argjson nq "$NQ_MED" \
+  --argjson cf "$CF_MED" \
+  --argjson nf "$NF_MED" '
+  {
+    timestamp: $ts,
+    interface: $iface,
+    runs: ($n|tonumber),
+    wifi: $wifi,
+    networkquality: $nq,
+    cloudflare: $cf,
+    netflix: $nf
+  }')
+echo "$REC" >> "$LOG_FILE"
+
+# --- pretty summary --------------------------------------------------------
+if [[ $LOG_ONLY == 0 ]]; then
+  jq -r --arg iface "$IFACE" '
+    def num(x): if x == null then "?" else (x|tostring) end;
+    "WiFi:       " + (.wifi.ssid // "?") +
+      "  " + (.wifi.channel // "?") +
+      "  RSSI " + num(.wifi.rssi_dbm) + " dBm" +
+      "  " + (.wifi.phymode // "?") +
+      "  iface " + $iface,
+    "Apple RPM:  ↓ " + num(.networkquality.download_mbps) + " Mbps" +
+      "   ↑ " + num(.networkquality.upload_mbps) + " Mbps" +
+      "   responsiveness " + num(.networkquality.responsiveness) + " RPM",
+    "Cloudflare: ↓ " + num(.cloudflare.download_mbps) + " Mbps" +
+      "   ↑ " + num(.cloudflare.upload_mbps) + " Mbps" +
+      "   latency " + num(.cloudflare.latency_ms) + " ms",
+    "Netflix:    ↓ " + num(.netflix.downloadSpeed) + " Mbps" +
+      "   ↑ " + num(.netflix.uploadSpeed) + " Mbps" +
+      "   (Open Connect)"
+  ' <<<"$REC"
+  echo "Logged → $LOG_FILE"
+fi
