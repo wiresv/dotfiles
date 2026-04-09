@@ -51,6 +51,17 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/worktree_guard.py"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
