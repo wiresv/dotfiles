@@ -28,6 +28,7 @@ alias glg="git log --graph --pretty=format:'%C(blue)%h %C(black)%ad%C(magenta)%d
 alias py="python3"
 alias python="python3"
 alias pip="pip3"
+alias deac="deactivate"
 
 # homebrew
 alias brewbundle="brew bundle -f dump"
