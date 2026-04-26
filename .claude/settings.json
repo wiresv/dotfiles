@@ -50,6 +50,7 @@
       "Read(./build)"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -99,7 +100,7 @@
   },
   "syntaxHighlightingDisabled": false,
   "alwaysThinkingEnabled": true,
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
-  "model": "opus[1m]"
+  "theme": "light-daltonized"
 }
