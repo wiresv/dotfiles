@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Email reference — Modern Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!--
+  =================================================================
+  EMAIL REFERENCE — Modern Editorial
+  Plain-style HTML email, transactional or newsletter section.
+
+  HARD CONSTRAINTS unique to email
+    · Max content width ~600px
+    · No flex/grid (many email clients still render them poorly).
+      Use simple stacked blocks.
+    · No external resources except the font CDN, and even fonts
+      should fall back gracefully on clients that strip them.
+    · No background images, no SVG logos beyond the absolute basics.
+
+  PRIMITIVES USED
+    · Editorial title in Fraunces (smaller than web — emails are
+      read at a closer distance and at the recipient's font size)
+    · A small wordmark line at the top
+    · Eyebrow with section + date
+    · Italic emphasis inside <em>
+    · Footnote-style superscripts on named entities
+    · Hairline section breaks
+    · Small italic-serif sign-off
+
+  NOT USED
+    · No fleuron colophon (overkill for a piece of mail)
+    · No stat ledger, no chart, no catalog
+    · No marketing CTA buttons — the system supports a single
+      ghost link rendered inline if needed
+    · No marker highlight unless the piece is specifically a
+      newsletter with a hero. Transactional mail = no marker.
+  =================================================================
+-->
+
+<style>
+  :root {
+    --paper:    #FAFAF6;
+    --ink:      #14110E;
+    --ink-soft: #2A2520;
+    --mute:     #54504A;
+    --mute-2:   #968F86;
+    --hair:     rgba(20, 17, 14, 0.12);
+    --hair-2:   rgba(20, 17, 14, 0.26);
+    --accent:   #E5484D;
+    --indigo:   #5B6CFF;
+    --marker-soft: rgba(255, 217, 61, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #ECEAE3;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "tnum";
+    font-family: "Geist", system-ui, sans-serif;
+    padding: 32px 16px;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  /* The email "page" — fixed narrow column */
+  .email {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--paper);
+    padding: 40px 36px 36px;
+  }
+
+  /* ===== TINY WORDMARK ROW ===== */
+  .wordmark-row {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--hair);
+    margin-bottom: 22px;
+  }
+  .wordmark {
+    font-family: "Geist", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: inline-block;
+  }
+  .wordmark em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+    margin-left: 8px;
+    font-size: 13px;
+  }
+
+  /* ===== EYEBROW (compact, single line) ===== */
+  .eyebrow {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .eyebrow .sep { color: var(--mute-2); margin: 0 8px; }
+  .eyebrow em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+  }
+
+  /* ===== TITLE — restrained, this is mail not a poster ===== */
+  h1.title {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 1;
+    margin-bottom: 22px;
+  }
+  h1.title i {
+    font-style: italic;
+    font-variation-settings: "opsz" 72, "SOFT" 100, "WONK" 1;
+  }
+  h1.title .full-stop { color: var(--accent); }
+
+  /* ===== BODY ===== */
+  .email p {
+    font-family: "Fraunces", serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin-bottom: 16px;
+    font-variation-settings: "opsz" 24, "SOFT" 30;
+  }
+  .email p em { font-style: italic; color: var(--ink); }
+  .email p sup {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-left: 2px;
+    vertical-align: super;
+  }
+  .email p a {
+    color: var(--ink);
+    text-underline-offset: 3px;
+    text-decoration-color: var(--accent);
+  }
+
+  /* ===== HAIRLINE SECTION RULE ===== */
+  .rule {
+    border: 0;
+    border-top: 1px solid var(--hair-2);
+    margin: 28px 0;
+  }
+
+  /* ===== A SMALL "WHAT'S INSIDE" LIST ===== */
+  ul.toc {
+    list-style: none;
+    margin: 4px 0 18px;
+    padding: 0;
+  }
+  ul.toc li {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--hair);
+    font-family: "Fraunces", serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+    font-variation-settings: "opsz" 24;
+  }
+  ul.toc li:last-child { border-bottom: 0; }
+  ul.toc li em { font-style: italic; color: var(--ink-soft); }
+  ul.toc .num {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+
+  /* ===== FOOTNOTES (inline, compact) ===== */
+  .footnotes {
+    margin-top: 28px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hair-2);
+    font-family: "Fraunces", serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    font-variation-settings: "opsz" 18;
+  }
+  .footnotes p { margin-bottom: 8px; font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; }
+  .footnotes em { font-style: italic; }
+  .footnotes .num {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin-right: 4px;
+    vertical-align: super;
+  }
+
+  /* ===== SIGN-OFF ===== */
+  .signoff {
+    margin-top: 28px;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.5;
+    font-variation-settings: "opsz" 18, "SOFT" 70, "WONK" 1;
+  }
+  .signoff em { font-style: italic; color: var(--ink-soft); }
+
+  /* ===== FOOTER (very small, like real mail) ===== */
+  .email-foot {
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--hair);
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .email-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .email-foot p { font-family: inherit; font-size: inherit; line-height: 1.6; margin-bottom: 4px; }
+
+  .marked {
+    background: linear-gradient(transparent 62%, var(--marker-soft) 62%, var(--marker-soft) 92%, transparent 92%);
+    padding: 0 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="email">
+
+  <div class="wordmark-row">
+    <span class="wordmark">The Carrier Press<em>letters &amp; literature</em></span>
+  </div>
+
+  <div class="eyebrow">
+    Letter № xiv <span class="sep">·</span> 28 April 2026
+    <span class="sep">·</span> <em>spring list</em>
+  </div>
+
+  <h1 class="title">
+    A short note on a <i><span class="marked">quiet</span></i> Tuesday<span class="full-stop">.</span>
+  </h1>
+
+  <p>
+    Dear friend &mdash;
+  </p>
+
+  <p>
+    A quick note from the desk this morning. Three manuscripts cleared copy
+    overnight, two more were sent to the typesetter, and the warehouse in
+    Rhinebeck dispatched <em>nine hundred and twelve</em> advance copies of
+    <em>The Carpathian Letters</em><sup>1</sup> before noon.
+    A productive day, and a small one.
+  </p>
+
+  <hr class="rule" />
+
+  <p style="margin-bottom: 6px;"><strong style="font-family:'Geist Mono', monospace; font-size:10px; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink-soft);">In this letter</strong></p>
+
+  <ul class="toc">
+    <li><span class="num">i.</span><em>The Carpathian Letters</em>, in&nbsp;the&nbsp;world</li>
+    <li><span class="num">ii.</span>A note on Pevsner's <em>Bestiary</em></li>
+    <li><span class="num">iii.</span>Beasley's reading at McNally's, late May</li>
+  </ul>
+
+  <hr class="rule" />
+
+  <p>
+    Pevsner's <em>An Incomplete Bestiary</em><sup>2</sup> came back from the
+    typesetter looking remarkable &mdash; one running-head correction on the
+    verso, otherwise pristine. We expect to be at press by the end of next
+    week, and bound copies in early July.
+  </p>
+
+  <p>
+    Diane Beasley has confirmed Friday, 22 May, for her launch reading at
+    McNally's in Brooklyn. <em>You'll have an invitation in a separate
+    note.</em>
+  </p>
+
+  <div class="footnotes">
+    <p>
+      <span class="num">1</span><em>The Carpathian Letters</em> &mdash; Anya Voronova,
+      trans. P. Hale. ISBN 978-1-948-21102-6. Available at independent
+      booksellers from today.
+    </p>
+    <p>
+      <span class="num">2</span><em>An Incomplete Bestiary</em> &mdash; Margaret
+      Pevsner. Forthcoming July 2026; pre-orders open in May.
+    </p>
+  </div>
+
+  <div class="signoff">
+    <em>Yours in the work,</em><br/>
+    M. Aguila &mdash; for the desk
+  </div>
+
+  <div class="email-foot">
+    <p>You are receiving this because you subscribed at <a href="#">the.press / letters</a>.</p>
+    <p>The Carrier Press · 47 Bond St., Brooklyn · <a href="#">Unsubscribe</a></p>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Slide reference — Modern Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!--
+  =================================================================
+  SLIDE REFERENCE — Modern Editorial
+  Single 16:9 deck slide. The shape of a presentation in this style.
+
+  This file shows two slides as the recurring pattern:
+   1. A "big idea" slide — one large italic Fraunces statement
+   2. A "figure" slide — a single number with an italic-serif aside
+
+  PRIMITIVES USED
+    · Big italic Fraunces display (huge — slides reward scale)
+    · One marker on a single italic word (across the deck, not per
+      slide — so once across all slides total)
+    · Eyebrow strip at the top (slide title + counter)
+    · Hairline frame defining the slide
+    · Footer slug in mono (presenter, deck name, slide num)
+
+  NOT USED
+    · No chart, table, ledger, log, or fleuron on individual slides
+    · Charts and figures live on dedicated slides — never as
+      decoration around copy
+    · No bullet lists with multiple bullet points — slides in this
+      system are one-idea-per-slide
+  =================================================================
+-->
+
+<style>
+  :root {
+    --paper:    #FAFAF6;
+    --ink:      #14110E;
+    --ink-soft: #2A2520;
+    --mute:     #54504A;
+    --mute-2:   #968F86;
+    --hair:     rgba(20, 17, 14, 0.12);
+    --hair-2:   rgba(20, 17, 14, 0.26);
+    --accent:   #E5484D;
+    --indigo:   #5B6CFF;
+    --leaf:     #10B597;
+    --mustard:  #F58A1F;
+    --plum:     #9D5BFF;
+    --marker-soft: rgba(255, 217, 61, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #1f1d1a;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "tnum";
+    font-family: "Geist", system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  .deck {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* 16:9 slide */
+  .slide {
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* ===== EYEBROW STRIP (slide chrome) ===== */
+  .slide-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--hair-2);
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .slide-eyebrow .rule { width: 28px; height: 1px; background: var(--ink); }
+  .slide-eyebrow .right {
+    margin-left: auto;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  /* ===== FOOTER STRIP ===== */
+  .slide-foot {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid var(--hair-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .slide-foot em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* ===== SLIDE TYPE 1 — BIG IDEA ===== */
+  .slide.idea .body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 0;
+  }
+  .slide.idea h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    max-width: 90%;
+  }
+  .slide.idea h2 i {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  }
+  .slide.idea h2 .full-stop { color: var(--accent); }
+
+  .marked {
+    background: linear-gradient(transparent 62%, var(--marker-soft) 62%, var(--marker-soft) 92%, transparent 92%);
+    padding: 0 0.04em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* ===== SLIDE TYPE 2 — A FIGURE ===== */
+  .slide.figure .body {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 56px;
+    padding: 24px 0;
+  }
+  .slide.figure .num-col {
+    flex: 1.6 1 0;
+    min-width: 0;
+  }
+  .slide.figure .roman {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--mute-2);
+    margin-bottom: 12px;
+    display: block;
+  }
+  .slide.figure .label {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 28px;
+    white-space: nowrap;
+  }
+  .slide.figure .number {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(96px, 14vw, 192px);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .slide.figure .number .u {
+    font-family: "Geist Mono", monospace;
+    font-size: 14px;
+    color: var(--ink-soft);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .slide.figure .aside-col {
+    flex: 1 1 0;
+    min-width: 0;
+    border-left: 1px solid var(--hair-2);
+    padding-left: 36px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.figure .aside {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--ink);
+    font-variation-settings: "opsz" 36, "SOFT" 70, "WONK" 1;
+  }
+  .slide.figure .aside em { font-style: italic; }
+  .slide.figure .delta {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--leaf);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 18px;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ============== SLIDE 1: THE BIG IDEA ============== -->
+  <section class="slide idea">
+
+    <div class="slide-eyebrow">
+      <span class="rule"></span>
+      <span>Section ii · a thesis</span>
+      <span class="right">on writing <em style="font-style:italic">slowly</em></span>
+    </div>
+
+    <div class="body">
+      <h2>
+        The first<br/>
+        draft is<br/>
+        <i><span class="marked">supposed</span></i> to be<br/>
+        terrible<span class="full-stop">.</span>
+      </h2>
+    </div>
+
+    <div class="slide-foot">
+      <span>The Carrier Press · A. Wade · spring 2026</span>
+      <span>04 / 18</span>
+    </div>
+
+  </section>
+
+  <!-- ============== SLIDE 2: A FIGURE ============== -->
+  <section class="slide figure">
+
+    <div class="slide-eyebrow">
+      <span class="rule"></span>
+      <span>Section iii · the numbers</span>
+      <span class="right">a quietly remarkable spring</span>
+    </div>
+
+    <div class="body">
+      <div class="num-col">
+        <span class="roman">iii.</span>
+        <div class="label">Hours at the eyepiece · q2</div>
+        <div class="number">206<span class="u">hrs</span></div>
+      </div>
+      <div class="aside-col">
+        <p class="aside">
+          Across thirteen weeks, the station logged forty-two clear nights
+          and two hundred and six hours of <em>useful sky</em>.
+          <span class="delta">▲ 9 nights vs. q2 2025</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="slide-foot">
+      <span>The Carrier Press · A. Wade · spring 2026</span>
+      <span>09 / 18</span>
+    </div>
+
+  </section>
+
+</div>
+
+</body>
+</html>

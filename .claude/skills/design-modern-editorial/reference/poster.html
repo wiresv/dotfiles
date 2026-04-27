@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Poster reference — Modern Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!--
+  =================================================================
+  POSTER REFERENCE — Modern Editorial
+  Event posters, large-format announcements, gallery cards.
+
+  Sized as A3 portrait (~297x420mm). Pure typography poster — the
+  goal is one image-grade typographic moment, with everything else
+  in service of it.
+
+  PRIMITIVES USED
+    · Massive Fraunces hero — the entire poster IS the headline
+    · One marker on a single italic word
+    · Eyebrow at the top
+    · Mono date/venue strip below the hero
+    · A single fleuron at the bottom-center as a graphic anchor
+    · Roman-numeral section markers in the meta strip
+
+  DELIBERATELY LIMITED
+    · No body copy beyond a one-sentence dedication
+    · No CTA, no nav, no legal
+    · No more than three jewel-tones visible at once
+    · The fleuron IS the only color besides ink, marker, and accent
+  =================================================================
+-->
+
+<style>
+  :root {
+    --paper:    #FAFAF6;
+    --ink:      #14110E;
+    --ink-soft: #2A2520;
+    --mute:     #54504A;
+    --mute-2:   #968F86;
+    --hair:     rgba(20, 17, 14, 0.12);
+    --hair-2:   rgba(20, 17, 14, 0.26);
+    --accent:   #E5484D;
+    --indigo:   #5B6CFF;
+    --leaf:     #10B597;
+    --mustard:  #F58A1F;
+    --plum:     #9D5BFF;
+    --marker-soft: rgba(255, 217, 61, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: #1f1d1a;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "tnum";
+    font-family: "Geist", system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+  }
+
+  /* The poster itself — A3 portrait at scale */
+  .poster {
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 297 / 420;
+    padding: 56px 56px 44px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  /* ===== TOP STRIP: eyebrow ===== */
+  .eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--hair-2);
+  }
+  .eyebrow .rule { width: 28px; height: 1px; background: var(--ink); }
+  .eyebrow .num {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  /* ===== THE HEADLINE — the entire reason for the poster ===== */
+  h1.poster-title {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(64px, 14vw, 132px);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    margin: 64px 0 36px;
+  }
+  h1.poster-title i {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  }
+  h1.poster-title .full-stop { color: var(--accent); }
+
+  .marked {
+    background: linear-gradient(transparent 62%, var(--marker-soft) 62%, var(--marker-soft) 92%, transparent 92%);
+    padding: 0 0.04em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* ===== DEDICATION (one sentence — italic-serif) ===== */
+  .dedication {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin-bottom: auto;
+    font-variation-settings: "opsz" 36, "SOFT" 70, "WONK" 1;
+  }
+  .dedication em { font-style: italic; }
+
+  /* ===== DATE / VENUE STRIP ===== */
+  .meta {
+    display: flex;
+    border-top: 1px solid var(--hair-2);
+    padding-top: 18px;
+    margin-top: 36px;
+    margin-bottom: 24px;
+  }
+  .meta .cell {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 24px;
+    border-right: 1px solid var(--hair);
+  }
+  .meta .cell:last-child {
+    border-right: 0;
+    padding-right: 0;
+    text-align: right;
+  }
+  .meta .roman {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--mute-2);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .meta .label {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .meta .value {
+    font-family: "Fraunces", serif;
+    font-size: 19px;
+    line-height: 1.25;
+    color: var(--ink);
+    font-variation-settings: "opsz" 36, "SOFT" 30;
+  }
+  .meta .value em { font-style: italic; color: var(--ink-soft); }
+
+  /* ===== BOTTOM ROW: fleuron + signature ===== */
+  .bottom {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 18px;
+    border-top: 1px solid var(--hair-2);
+  }
+  .bottom .left {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-variation-settings: "opsz" 18;
+  }
+  .bottom .right {
+    font-family: "Geist Mono", monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .fleuron-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Decorative seal mark sitting just below the eyebrow on the right.
+     A small editorial flourish unique to posters; not used in dashboards. */
+  .seal {
+    position: absolute;
+    top: 92px;
+    right: 56px;
+    width: 56px;
+    height: 56px;
+    border: 1.4px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: "Geist Mono", monospace;
+    font-size: 8px;
+    color: var(--ink);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+    background: var(--paper);
+  }
+  .seal em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+  <div class="eyebrow">
+    <span class="rule"></span>
+    <span>An evening · n° iv</span>
+    <span style="flex:1"></span>
+    <span class="num">a small <em style="font-style:italic">gathering</em></span>
+  </div>
+
+  <div class="seal" aria-hidden="true">
+    A.D.
+    <em>mmxxvi</em>
+  </div>
+
+  <h1 class="poster-title">
+    On the<br/>
+    art of the<br/>
+    <i><span class="marked">slow</span></i> read<span class="full-stop">.</span>
+  </h1>
+
+  <p class="dedication">
+    A reading and conversation with the editors of <em>The Carrier Press</em> on
+    why some books take a decade to write — and why that may be exactly the
+    correct amount of time.
+  </p>
+
+  <div class="meta">
+    <div class="cell">
+      <span class="roman">i.</span>
+      <div class="label">Date</div>
+      <div class="value">Friday, <em>17 May 2026</em><br/>7:30 in the evening</div>
+    </div>
+    <div class="cell">
+      <span class="roman">ii.</span>
+      <div class="label">Venue</div>
+      <div class="value">McNally's, <em>Brooklyn</em><br/>134 Prince St.</div>
+    </div>
+    <div class="cell">
+      <span class="roman">iii.</span>
+      <div class="label">Admission</div>
+      <div class="value">Free, <em>but ticketed</em><br/>rsvp · the.press / iv</div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="left">presented with <em>kindness</em> by the press</div>
+    <div class="fleuron-wrap" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <g fill="none" stroke-width="1.2" stroke-linecap="round">
+          <path d="M16 3 L16 29 M3 16 L29 16" stroke="#9D5BFF"/>
+          <path d="M7 7 L25 25 M25 7 L7 25" stroke="#E5484D"/>
+          <circle cx="16" cy="16" r="3" fill="#F58A1F" stroke="none"/>
+          <circle cx="16" cy="16" r="6" stroke="#5B6CFF"/>
+        </g>
+      </svg>
+    </div>
+    <div class="right">№ iv · est. mcmxcvi</div>
+  </div>
+
+</div>
+
+</body>
+</html>

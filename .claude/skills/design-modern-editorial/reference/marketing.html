@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marketing reference — Modern Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!--
+  =================================================================
+  MARKETING REFERENCE — Modern Editorial
+  Landing pages, marketing one-pagers, product hero sections.
+
+  PRIMITIVES USED
+    · Massive Fraunces hero (push to 200px+) with one marker
+    · Eyebrow above the hero
+    · Italic-serif lede line
+    · Three feature cells separated by hairlines (DESCRIPTIVE,
+      not numeric — these are *not* a stat ledger)
+    · Subtle ghost CTA — bordered, not filled
+    · Footnote-style asterisks on legal copy
+    · A small sign-off line at the bottom — NOT a fleuron
+
+  NOT USED
+    · No three-column masthead with brand · section · meta
+    · No stat ledger with big numbers (a marketing hero is not a
+      KPI dashboard)
+    · No fleuron colophon (this is a page, not a periodical)
+    · No chart, no catalog, no editorial log
+  =================================================================
+-->
+
+<style>
+  :root {
+    --paper:    #FAFAF6;
+    --ink:      #14110E;
+    --ink-soft: #2A2520;
+    --mute:     #54504A;
+    --mute-2:   #968F86;
+    --hair:     rgba(20, 17, 14, 0.12);
+    --hair-2:   rgba(20, 17, 14, 0.26);
+    --accent:   #E5484D;
+    --indigo:   #5B6CFF;
+    --leaf:     #10B597;
+    --mustard:  #F58A1F;
+    --plum:     #9D5BFF;
+    --marker-soft: rgba(255, 217, 61, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "tnum";
+  }
+
+  body {
+    font-family: "Geist", system-ui, sans-serif;
+    font-weight: 400;
+    padding: 28px 48px 64px;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  main { max-width: 1280px; margin: 0 auto; }
+
+  /* ===== TINY TOP BAR (just the wordmark — no masthead) ===== */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--hair);
+  }
+  .wordmark {
+    font-family: "Geist", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .wordmark em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+    margin-left: 8px;
+    font-size: 14px;
+  }
+  .topnav {
+    display: flex; gap: 28px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .topnav a { color: inherit; text-decoration: none; }
+  .topnav a:hover { color: var(--ink); }
+
+  /* ===== EYEBROW ===== */
+  .eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin: 80px 0 28px;
+  }
+  .eyebrow .rule { width: 32px; height: 1px; background: var(--ink); }
+  .eyebrow .num {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  /* ===== HERO ===== */
+  h1.hero {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(80px, 12vw, 200px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    margin-bottom: 36px;
+  }
+  h1.hero i {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  }
+  h1.hero .full-stop { color: var(--accent); }
+  .marked {
+    background: linear-gradient(transparent 62%, var(--marker-soft) 62%, var(--marker-soft) 92%, transparent 92%);
+    padding: 0 0.04em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* ===== SUB-HERO ROW: lede + CTA ===== */
+  .sub {
+    display: flex;
+    gap: 56px;
+    align-items: end;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--hair-2);
+  }
+  .sub .lede {
+    flex: 1.6 1 0;
+    min-width: 0;
+    font-family: "Fraunces", serif;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+    font-variation-settings: "opsz" 36, "SOFT" 30;
+    max-width: 620px;
+  }
+  .sub .lede em { font-style: italic; color: var(--ink); }
+  .sub .lede sup {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    margin: 0 1px 0 2px;
+    vertical-align: super;
+  }
+  .sub .cta-col {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: right;
+  }
+
+  /* Ghost CTA — bordered, never filled */
+  a.cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    font-family: "Geist", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 200ms cubic-bezier(.2,.7,.2,1);
+  }
+  a.cta:hover { background: var(--ink); color: var(--paper); }
+  a.cta .arrow { font-family: "Geist Mono", monospace; }
+  a.cta-secondary {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--hair-2);
+  }
+
+  /* ===== THREE FEATURE CELLS (DESCRIPTIVE, not numeric) ===== */
+  .features {
+    display: flex;
+    padding: 56px 0;
+    border-bottom: 1px solid var(--hair-2);
+  }
+  .features .cell {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 28px;
+    border-right: 1px solid var(--hair);
+  }
+  .features .cell:first-child { padding-left: 0; }
+  .features .cell:last-child  { padding-right: 0; border-right: 0; }
+
+  .cell .roman {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--mute-2);
+    margin-bottom: 18px;
+    display: block;
+  }
+  .cell h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    font-variation-settings: "opsz" 72, "SOFT" 30;
+    margin-bottom: 14px;
+  }
+  .cell h3 em { font-style: italic; color: var(--ink-soft); }
+  .cell p {
+    font-family: "Fraunces", serif;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink);
+    font-variation-settings: "opsz" 24;
+  }
+  .cell p em { font-style: italic; color: var(--ink-soft); }
+
+  /* ===== TESTIMONIAL STRIP ===== */
+  .testimonial {
+    padding: 56px 0;
+    display: flex;
+    gap: 48px;
+    align-items: baseline;
+    border-bottom: 1px solid var(--hair-2);
+  }
+  .testimonial .marker {
+    flex: 0 0 80px;
+    border-left: 2px solid var(--accent);
+    padding-left: 16px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .testimonial .quote {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.3;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 72, "SOFT" 70, "WONK" 1;
+  }
+  .testimonial .attrib {
+    margin-top: 16px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  /* ===== LEGAL / FINE PRINT (footnote-style) ===== */
+  .legal {
+    padding-top: 28px;
+    display: flex;
+    gap: 32px;
+    font-family: "Fraunces", serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    font-variation-settings: "opsz" 18;
+  }
+  .legal > * { flex: 1 1 0; min-width: 0; }
+  .legal em { font-style: italic; }
+  .legal .num {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-right: 4px;
+    vertical-align: super;
+  }
+
+  /* ===== FOOTER (lightweight — no fleuron, no colophon) ===== */
+  footer {
+    margin-top: 56px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hair);
+    display: flex;
+    justify-content: space-between;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  footer em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="topbar">
+    <div class="wordmark">Carrier &amp; Co.<em>archival writing tools</em></div>
+    <nav class="topnav">
+      <a href="#">Product</a>
+      <a href="#">Pricing</a>
+      <a href="#">Stories</a>
+      <a href="#">Sign in</a>
+    </nav>
+  </header>
+
+  <div class="eyebrow">
+    <span class="rule"></span>
+    <span>The 2026 release</span>
+    <span style="flex:1"></span>
+    <span class="num">three years in the <em style="font-style:italic">making</em></span>
+  </div>
+
+  <h1 class="hero">
+    Notes that<br/>
+    <i>last</i> <i><span class="marked">forever</span></i><span class="full-stop">.</span>
+  </h1>
+
+  <section class="sub">
+    <p class="lede">
+      A small, opinionated app for the kind of long-form thinking that doesn't
+      survive the cloud. Local-first, plain-text, <em>quietly indexed</em>. Made
+      for the writer who keeps the same notebook open for a decade<sup>*</sup>.
+    </p>
+    <div class="cta-col">
+      <a href="#" class="cta">Try the beta <span class="arrow">→</span></a>
+      <br/>
+      <a href="#" class="cta-secondary">read the manifesto</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="cell">
+      <span class="roman">i.</span>
+      <h3>Local-first, <em>not</em> cloud-only</h3>
+      <p>
+        Your notes are <em>files on your disk</em> — readable in any text editor,
+        portable to any machine, never held hostage by a subscription.
+      </p>
+    </div>
+    <div class="cell">
+      <span class="roman">ii.</span>
+      <h3>An <em>archival</em> file format</h3>
+      <p>
+        Plain markdown with a small, documented frontmatter. The format will
+        be readable, with or without us, in <em>fifty years</em>.
+      </p>
+    </div>
+    <div class="cell">
+      <span class="roman">iii.</span>
+      <h3>Quietly <em>indexed</em></h3>
+      <p>
+        Backlinks, dates, tags — all derived from your prose. Nothing to
+        configure. Nothing to migrate. Just write.
+      </p>
+    </div>
+  </section>
+
+  <section class="testimonial">
+    <div class="marker">From a<br/>reader.</div>
+    <div>
+      <div class="quote">
+        "I have used Carrier every morning for two years. It is the first writing
+        tool I have ever owned that makes me <em>want to write more</em>."
+      </div>
+      <div class="attrib">— H. Singh · novelist · Brooklyn</div>
+    </div>
+  </section>
+
+  <div class="legal">
+    <div>
+      <span class="num">*</span>The "decade-old notebook" line is a metaphor, but
+      not by much: the format is documented in <em>spec.md</em>, the data
+      remains yours, and the app is open source.
+    </div>
+    <div>
+      <span class="num">†</span>Free during the public beta. After that, a
+      one-time purchase &mdash; no subscriptions, no per-seat tiers, no
+      <em>enterprise</em> upsell.
+    </div>
+  </div>
+
+  <footer>
+    <span>Carrier &amp; Co. · <em>made in Brooklyn</em></span>
+    <span>v 0.9 · public beta</span>
+  </footer>
+
+</main>
+</body>
+</html>

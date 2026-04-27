@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Article reference — Modern Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<!--
+  =================================================================
+  ARTICLE REFERENCE — Modern Editorial
+  Long-form writing: essays, research notes, editorial pieces.
+
+  PRIMITIVES USED
+    · Big italic Fraunces title (with one marker on a single word)
+    · Eyebrow above the title
+    · Drop cap on the opening paragraph
+    · Footnote-style superscripts on named entities
+    · Italic emphasis inside <em>
+    · Hairline section dividers
+    · A pull quote with an accent-red marker rule
+
+  NOT USED (would be dashboard transplant if we did)
+    · No masthead with brand · section · meta
+    · No stat ledger
+    · No catalog table
+    · No chart
+    · No editorial log
+    · No fleuron colophon
+
+  Body type is Fraunces at opsz 36-48 — articles benefit from
+  reading-grade Fraunces, unlike the dashboard which uses Geist
+  for body. Drop caps and pull quotes are the only "moments"
+  beyond the title's marker.
+  =================================================================
+-->
+
+<style>
+  :root {
+    --paper:    #FAFAF6;
+    --ink:      #14110E;
+    --ink-soft: #2A2520;
+    --mute:     #54504A;
+    --mute-2:   #968F86;
+    --hair:     rgba(20, 17, 14, 0.12);
+    --hair-2:   rgba(20, 17, 14, 0.26);
+    --accent:   #E5484D;
+    --indigo:   #5B6CFF;
+    --marker-soft: rgba(255, 217, 61, 0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern", "tnum";
+  }
+
+  body {
+    font-family: "Geist", system-ui, sans-serif;
+    font-weight: 400;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  /* article column — narrow, generous, reading-grade */
+  article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 72px 32px 96px;
+  }
+
+  /* ===== EYEBROW ===== */
+  .eyebrow {
+    display: flex; align-items: center; gap: 14px;
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .eyebrow .rule { width: 32px; height: 1px; background: var(--ink); }
+  .eyebrow .num {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  /* ===== TITLE ===== */
+  h1.title {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    margin-bottom: 18px;
+  }
+  h1.title i {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  }
+  h1.title .full-stop { color: var(--accent); }
+  .marked {
+    background: linear-gradient(transparent 62%, var(--marker-soft) 62%, var(--marker-soft) 92%, transparent 92%);
+    padding: 0 0.04em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* ===== STANDFIRST ===== */
+  .standfirst {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+    font-variation-settings: "opsz" 36, "SOFT" 50, "WONK" 1;
+  }
+
+  /* ===== BYLINE ===== */
+  .byline {
+    display: flex; gap: 18px; align-items: baseline;
+    padding: 14px 0 32px;
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair-2);
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 36px;
+  }
+  .byline .who { color: var(--ink); }
+  .byline .sep { color: var(--mute-2); }
+  .byline .right { margin-left: auto; }
+
+  /* ===== BODY ===== */
+  article p {
+    font-family: "Fraunces", serif;
+    font-size: 18.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin-bottom: 22px;
+    font-variation-settings: "opsz" 36, "SOFT" 30, "WONK" 0;
+  }
+  article p em { font-style: italic; color: var(--ink); }
+  article p sup.fn {
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-left: 1.5px;
+    vertical-align: super;
+  }
+
+  /* drop cap on the first paragraph */
+  article p.lede::first-letter {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 84px;
+    line-height: 0.9;
+    float: left;
+    padding: 6px 14px 0 0;
+    color: var(--ink);
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+  }
+
+  /* ===== SECTION HEAD ===== */
+  h2.section {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 44px 0 18px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hair-2);
+    font-variation-settings: "opsz" 72, "SOFT" 30;
+  }
+  h2.section em { font-style: italic; color: var(--ink-soft); }
+  h2.section .num {
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* ===== PULL QUOTE ===== */
+  blockquote.pull {
+    margin: 36px 0;
+    padding: 8px 0 8px 22px;
+    border-left: 2px solid var(--accent);
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 26px;
+    line-height: 1.3;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    font-variation-settings: "opsz" 72, "SOFT" 70, "WONK" 1;
+  }
+  blockquote.pull cite {
+    display: block;
+    margin-top: 14px;
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ===== FOOTNOTES ===== */
+  ol.footnotes {
+    list-style: none;
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--hair-2);
+    counter-reset: fn;
+  }
+  ol.footnotes li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 12px;
+    font-family: "Fraunces", serif;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    font-variation-settings: "opsz" 18;
+  }
+  ol.footnotes li em { font-style: italic; }
+  ol.footnotes li::before {
+    counter-increment: fn;
+    content: counter(fn);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-family: "Geist Mono", monospace;
+    font-style: normal;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  /* ===== SIGN-OFF (optional, fits articles) ===== */
+  .signoff {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--hair);
+    font-family: "Geist Mono", monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+  }
+  .signoff em {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+</style>
+</head>
+<body>
+
+<article>
+
+  <div class="eyebrow">
+    <span class="rule"></span>
+    <span>Essay · n° xxiii</span>
+    <span style="flex:1"></span>
+    <span class="num">on writing <em style="font-style:italic">slowly</em></span>
+  </div>
+
+  <h1 class="title">
+    The case for the <i><span class="marked">first</span></i> draft<span class="full-stop">.</span>
+  </h1>
+
+  <p class="standfirst">
+    Why the worst version of a piece is, almost always, the most useful one — and
+    what we lose when we polish too early.
+  </p>
+
+  <div class="byline">
+    <span>By <span class="who">M. Aguila</span></span>
+    <span class="sep">·</span>
+    <span>1,840 words</span>
+    <span class="right">28 April 2026</span>
+  </div>
+
+  <p class="lede">
+    Every writer I admire has, at some point in their career, made the same small
+    public confession: the first draft is <em>terrible</em>, and that is the entire point.
+    It is supposed to be terrible. The page that emerges from a clean morning of
+    writing is not a draft so much as a survey — a quick rough map of where the
+    territory might be. The polish that makes a piece feel inevitable comes later,
+    in the slow second pass, where the writer learns what the draft was trying
+    to be all along.
+  </p>
+
+  <p>
+    The trouble with the contemporary tools of writing is that they are very good
+    at hiding this stage from us. Word processors auto-correct. Editors suggest.
+    Models<sup class="fn">1</sup> rewrite the awkward sentence into something
+    fluent before we have had time to decide whether the awkwardness was the
+    point. The first draft, in other words, has been quietly automated out of
+    existence.
+  </p>
+
+  <h2 class="section">
+    <span class="num">i. The honest mess</span>
+    What a first draft is <em>actually</em> for
+  </h2>
+
+  <p>
+    A first draft is a thinking instrument before it is a piece of writing. Its
+    job is not to communicate to a reader; its job is to clarify, to the writer,
+    what the writer believes. The reason it reads badly is that it is doing two
+    things at once — making a thought and recording it — and neither task gets
+    the writer's full attention. This is fine. It is, in fact, the only honest
+    way to begin.
+  </p>
+
+  <blockquote class="pull">
+    "The page is a place to find out what you think — not to perform what you
+    already know."
+    <cite>— a teacher, somewhere, every year of school</cite>
+  </blockquote>
+
+  <p>
+    The teacher quoted above is apocryphal. I have heard it attributed to
+    Didion<sup class="fn">2</sup>, to Forster<sup class="fn">3</sup>, to half a
+    dozen others — and the attribution rarely matters, because the sentiment is
+    correct independent of who first said it. Writing is a way of thinking that
+    leaves a record. A first draft is the record before it has been edited into
+    something a reader can use.
+  </p>
+
+  <h2 class="section">
+    <span class="num">ii. The case for friction</span>
+    On the use of being <em>slow</em>
+  </h2>
+
+  <p>
+    There is a small genre of essays — I am, of course, contributing to it now —
+    that argues for the value of writing by hand, on paper, in pen. The reasoning
+    is usually some mix of nostalgia and neurology. I do not particularly trust
+    the neurology, but I am sympathetic to the nostalgia. What pen and paper
+    offer, more than anything else, is friction: a writing process that is
+    expensive enough to require a thought before each sentence.
+  </p>
+
+  <p>
+    A first draft on a screen is too cheap. The cursor blinks; the sentence
+    arrives; the sentence is replaced. We can write three opening paragraphs
+    in the time it would take, on paper, to commit to one. The result is a
+    kind of high-throughput, low-conviction prose — fluent, generic, and very
+    hard to remember.
+  </p>
+
+  <h2 class="section">
+    <span class="num">iii. A defence of the awkward sentence</span>
+    or, when not to <em>fix</em> it
+  </h2>
+
+  <p>
+    The clearest test of whether a sentence belongs in a first draft is whether
+    you remember writing it the next morning. The fluent ones — the ones that
+    seemed to write themselves — almost never pass. The awkward ones, the ones
+    you wrote because you could not think of how else to say it, almost always
+    do. They are the points where the draft ran into the actual difficulty of
+    the subject. The fluent ones are the points where it didn't.
+  </p>
+
+  <p>
+    Edit toward the awkward sentences. They are where the piece is. Polish
+    everything else into invisibility around them.
+  </p>
+
+  <ol class="footnotes">
+    <li>
+      Including, with no small irony, the model that helped draft <em>this</em>
+      essay's middle paragraphs. The author left the awkward sentences in.
+    </li>
+    <li>
+      <em>Joan Didion</em>, "Why I Write," <em>The New York Times Book Review</em>,
+      December 1976. The remark, if she made it, was made in passing.
+    </li>
+    <li>
+      <em>E. M. Forster</em>, <em>Aspects of the Novel</em>, 1927. He almost
+      certainly did not say it; the cadence is wrong.
+    </li>
+  </ol>
+
+  <div class="signoff">
+    <span>filed from <em>the desk</em></span>
+    <span>§ end</span>
+  </div>
+
+</article>
+
+</body>
+</html>

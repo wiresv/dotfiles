@@ -1,0 +1,73 @@
+/* ============================================================
+   Modern Editorial — design tokens
+   Drop-in CSS. Pair with the principles in reference/principles.md
+   and the worked example closest to your medium (dashboard.html,
+   article.html, marketing.html, poster.html, slide.html, email.html).
+   ============================================================ */
+
+/* Fonts. Load via <link> in <head> for best performance:
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+*/
+
+:root {
+  /* ===== Surfaces ===== */
+  --paper:    #FAFAF6;     /* bright, modern off-white with the slightest cream hint */
+  --paper-2:  #FFFFFF;     /* pure white for elevated surfaces (rare) */
+
+  /* ===== Ink & mid-tones — warm-toned for editorial credibility ===== */
+  --ink:      #14110E;     /* warm near-black */
+  --ink-2:    #2C2823;
+  --ink-soft: #2A2520;     /* body copy */
+  --mute:     #54504A;     /* secondary labels, technical chrome */
+  --mute-2:   #968F86;     /* decorative only — roman numerals etc. */
+
+  /* ===== Hairlines — only kind of border allowed ===== */
+  --hair:     rgba(20, 17, 14, 0.12);
+  --hair-2:   rgba(20, 17, 14, 0.26);
+
+  /* ===== Linear-style jewel-tone spot palette — ALWAYS used semantically =====
+     Role mappings below are typical (inherited from dashboard.html).
+     Re-bind them to whatever categories your artifact actually has. */
+  --indigo:   #5B6CFF;     /* typically: first / start / acquired */
+  --accent:   #E5484D;     /* editor's red — emphasis, footnote markers, "in progress" */
+  --leaf:     #10B597;     /* mint-teal — refined / done / calm-positive */
+  --mustard:  #F58A1F;     /* saturated amber — production / warm states */
+  --plum:     #9D5BFF;     /* bright violet — final / "today" annotation */
+
+  /* ===== Highlighter — exactly one yellow on the artifact ===== */
+  --marker:        #FFD93D;
+  --marker-soft:   rgba(255, 217, 61, 0.55);
+}
+
+/* ===== Reset / base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Geist", system-ui, sans-serif;
+  font-weight: 400;
+  /* Tabular figures everywhere — numerals must align by default */
+  font-feature-settings: "ss01", "kern", "tnum";
+}
+
+/* Inverted selection — small touch but matters */
+::selection { background: var(--ink); color: var(--paper); }
+
+/* ===== Type stack quick reference =====
+   Display & emphasis : Fraunces (variable)
+                        opsz 9-144, SOFT 0-100, WONK 0-1
+   Body / labels      : Geist (300-600)
+   Technical chrome   : Geist Mono (400-500)
+
+   Italic is reserved for <em> only — never as default for <p>.
+   See SKILL.md "Hard rules" for the full list of constraints.
+============================================================ */
