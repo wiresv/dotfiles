@@ -25,6 +25,27 @@ Abort with an explanation if:
 - Current branch *is* the default branch — refuse to PR `main` into `main`. Tell the user to switch to a feature branch first.
 - There are zero commits ahead of the base branch — nothing to PR.
 
+## Step 2.5 — Ensure a descriptive branch name
+
+Claude Code worktrees generate random branch names (e.g., `worktree-mighty-sprouting-honey`) that are meaningless in PR history. Detect and fix these before pushing.
+
+**When to rename:** if the current branch name matches any of these patterns:
+- Starts with `worktree-`
+- Matches the three-word `<adjective>-<gerund>-<noun>` pattern typical of auto-generated worktree names (e.g., `quizzical-juggling-swan`, `resilient-wobbling-glacier`)
+- Is otherwise clearly non-descriptive of the actual changes
+
+**How to rename:**
+1. Analyze the commits in the PR range (`git log <base>..HEAD` and `git diff <base>...HEAD --stat`) to understand what changed.
+2. Generate a branch name that is:
+   - **Brief:** 2–5 words joined by hyphens, ideally under 40 characters total.
+   - **Descriptive:** conveys the nature of the change at a glance.
+   - **Conventional:** use a prefix matching the change type: `feat/`, `fix/`, `refactor/`, `docs/`, `chore/`, `test/`, `perf/`, `ci/` (e.g., `fix/calendar-date-parsing`, `feat/patient-api-patch`, `docs/update-claude-md`).
+   - **Lowercase, hyphen-separated** — no underscores, no uppercase, no special characters.
+3. Rename: `git branch -m <old-name> <new-name>`
+4. The branch must NOT have been pushed yet (no upstream). If it has already been pushed under the old name, do NOT rename — use it as-is to avoid confusion.
+
+**When to keep the current name:** if the branch already has a descriptive name chosen by the user, or if it has already been pushed to the remote, leave it alone.
+
 ## Step 3 — Push the branch
 
 - If the branch has no upstream: `git push -u origin <current-branch>`

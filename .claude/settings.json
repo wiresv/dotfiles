@@ -1,9 +1,12 @@
 {
-  "env": {},
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(*)",
+      "Bash(curl *)",
       "Read(*)",
       "Edit(*)",
       "Write(*)",
@@ -18,7 +21,6 @@
       "Bash(rm -rf *)",
       "Bash(rm -r *)",
       "Bash(sudo *)",
-      "Bash(curl *)",
       "Bash(wget *)",
       "Bash(dd *)",
       "Bash(mkfs *)",
@@ -50,7 +52,7 @@
       "Read(./build)"
     ]
   },
-  "model": "opus[1m]",
+  "model": "claude-opus-4-6[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -90,6 +92,9 @@
     "type": "command",
     "command": "$HOME/.claude/statusline.sh"
   },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -101,6 +106,8 @@
   "syntaxHighlightingDisabled": false,
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
-  "theme": "light-daltonized"
+  "theme": "light-daltonized",
+  "skipAutoPermissionPrompt": true
 }
