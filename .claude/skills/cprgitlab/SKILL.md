@@ -100,9 +100,111 @@ Do NOT pass any of these unless the user explicitly asked for them:
 - `--assignee` / `--reviewer`
 - `--label` / `--milestone`
 
-## Step 6 — Report
+## Step 6 — Report and spawn review agent
 
-Print the MR URL returned by `glab mr create` so the user can click it. Do not auto-merge, do not assign reviewers, do not add labels — leave those decisions to the user.
+Print the MR URL returned by `glab mr create` so the user can click it.
+
+Then **switch back to the default branch** so the feature branch is free for
+the review agent's worktree:
+
+```bash
+git checkout <default-branch>
+```
+
+### Spawn the autonomous review agent
+
+Use the `Agent` tool to spawn an independent reviewer in an isolated worktree.
+This is **mandatory** — do not skip it, do not run `/review-mr` yourself.
+
+```
+Agent({
+  name: "MR-<iid>-reviewer",
+  description: "Review MR !<iid>",
+  isolation: "worktree",
+  run_in_background: true,
+  prompt: <see below>
+})
+```
+
+**The agent prompt must be self-contained** — the subagent has zero memory of
+this session. Include all of these values (filled in from the MR you just
+created):
+
+```
+You are an independent code reviewer. Review, fix, and merge MR !{iid}.
+
+## Setup
+- Branch: {branch_name}
+- Target: {default_branch}
+- MR URL: {mr_url}
+- Project ID: {project_id} (get via: glab repo view -F json | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+
+1. Check out the branch: git checkout {branch_name}
+2. Read CLAUDE.md for the project's coding standards — every finding must be
+   grounded in those standards.
+
+## Review (Step 2)
+3. Get the full diff: git diff {default_branch}...HEAD
+4. Get the file overview: git diff {default_branch}...HEAD --stat
+5. Read every changed file IN FULL (not just diff hunks) to understand context.
+6. Review against these categories:
+   a. Architecture & Design (CLAUDE.md patterns, PSR-4, dependency injection)
+   b. Type Safety (strict_types, native types, no mixed, enums over constants)
+   c. Security — CRITICAL for this medical records system:
+      - SQL injection (must use QueryUtils with parameterized values)
+      - XSS (output escaped with attr(), text(), xlt(), xla())
+      - No direct superglobal access ($_GET, $_POST, $_SESSION, $GLOBALS)
+      - No patient data (PHI) in log messages
+      - Exception messages not exposed to users
+      - CSRF protection for state-changing endpoints
+      - Authorization checks for protected operations
+   d. Error Handling (catch \Throwable, PSR-3 context arrays, no catch-and-silence)
+   e. Testing (new paths covered, data providers have @codeCoverageIgnore)
+   f. PHPStan L10 compliance (no @var casts, no new baseline entries)
+   g. Style (conventional commits, file headers, 4-space indent)
+7. Parse the MR description's Test Plan items. Verify EVERY item:
+   - Verified: mark it [x] via glab api PUT on the MR description
+   - Failed: post a [Warning] discussion explaining what failed
+   - Cannot verify: post a note explaining why
+
+## Post findings (Step 3)
+8. For each finding, post an MR discussion via:
+   glab api "projects/{project_id}/merge_requests/{iid}/discussions" -X POST -f "body=..."
+   Prefix with severity: **[Critical]**, **[Warning]**, or **[Suggestion]**
+   Include: what's wrong, why it matters, and the suggested fix.
+9. Post a summary note with finding counts.
+
+## Fix (Step 4) — only if there are findings
+10. Fetch unresolved discussions from the MR.
+11. For each actionable finding: read the file, make the fix, verify locally.
+12. Stage specific files (no git add .), commit: fix: address review findings (iteration N)
+13. Push: git push
+14. Resolve each addressed discussion via:
+    glab api "projects/{project_id}/merge_requests/{iid}/discussions/{discussion_id}" -X PUT -f "resolved=true"
+15. Re-review the fix diff. Repeat up to 3 iterations.
+
+## Merge (Step 5) — only when all discussions are resolved
+16. Verify: all discussions resolved AND no new findings on latest diff.
+17. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
+18. Post final summary: how many findings addressed, iterations taken.
+
+## Rules
+- Never fabricate findings. Zero findings is a valid outcome.
+- Focus on what linters CANNOT catch: logic errors, security design, HIPAA gaps.
+- For docs-only diffs, abbreviate code review but ALWAYS verify test plan items.
+- Do not fix [Suggestion] items unless trivial. Focus on [Critical] and [Warning].
+- If after 3 iterations unresolved findings remain, post a summary and stop WITHOUT merging.
+```
+
+After spawning the agent, print:
+
+```
+Review agent spawned for MR !<iid> in background worktree.
+You will be notified when the review-fix-merge cycle completes.
+```
+
+**Do NOT run `/review-mr` yourself.** Do NOT wait for the agent to complete.
+Your job as the authoring session ends here — continue with other work.
 
 ## Notes
 - If `glab` is not installed, stop and tell the user to run `brew install glab`.
@@ -110,3 +212,8 @@ Print the MR URL returned by `glab mr create` so the user can click it. Do not a
 - If the repo's `origin` does not point at GitLab, stop and ask the user whether they meant to use `/cpr` (GitHub) instead.
 - If the repo has multiple remotes and `origin` is not the GitLab one, ask before proceeding rather than guessing.
 - If the working directory is a git worktree, everything above still applies — the worktree's branch is what gets pushed. Do not switch to the main worktree, do not delete the worktree, do not clean up the branch. The user manages worktree lifecycle separately.
+- **Review agent isolation:** The `Agent` tool creates a subagent with a
+  completely fresh context window — it receives only the prompt, zero
+  conversation history from this session. Combined with `isolation: "worktree"`,
+  the reviewer operates on an independent copy of the repo. This is
+  architecturally guaranteed to prevent confirmation bias.
