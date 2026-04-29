@@ -67,7 +67,40 @@ Run these in parallel:
 
 Also extract the MR description from the JSON obtained in Step 1. Parse the
 **Test plan** section — these are verification tasks that the MR author committed
-to. The review must address every test plan item (see Step 3h).
+to. The review must address every test plan item (see Step 3h) and apply the
+**test plan convention** (see "Test plan convention" section below).
+
+### Test plan convention
+
+Every test plan item is one of two kinds. The reviewer classifies each item
+**before** doing anything else with it:
+
+1. **Pre-merge gate** (default — no tag). Verifiable from a fresh clone of
+   the branch with no external services, no secrets, no deployed
+   environment. Examples: `composer phpstan`, `npm run lint:js`, `docker
+   compose build <service>`, `composer phpunit-isolated`, `python -m pytest
+   tests/unit -m 'not eval'`. The reviewer **runs each one** and ticks
+   `[x]` only on green.
+
+2. **Deploy-time gate** (tagged `[deploy-time](LINK)`). Requires real
+   secrets, deployed services, external systems, or production data.
+   `LINK` must be a URL pointing to the issue tracking the verification.
+   The reviewer leaves these unchecked but **edits the MR description in
+   place** to append `(verification deferred to <link>)` after the bullet
+   so the audit trail is honest.
+
+**Refuse-to-recommend-merge rules** — if any of these fail, the MR is
+incomplete and the reviewer must NOT advise merging (and, in the
+autonomous flow, must NOT call `glab mr merge`):
+
+- The MR has **zero pre-merge gates.** Push back with a `[Critical]`
+  discussion asking the author to add at least one pre-merge gate (build,
+  type-check, unit test against fixtures, lint, etc.).
+- A `[deploy-time]` item has no tracking link. Post a `[Warning]` asking
+  the author to add a link.
+- A pre-merge gate failed when run, or could not be run for a reason
+  other than environmental (missing tooling on the reviewer's box is
+  treated as "could not verify" — see Step 3h — not an MR failure).
 
 Read the project's `CLAUDE.md` to understand coding standards. This is critical — every finding must be grounded in the project's actual conventions, not generic best practices.
 
@@ -127,22 +160,33 @@ discussions after fixing the code once.
 - 4-space indentation, LF line endings?
 
 ### 3h. Test Plan Verification (MANDATORY)
-The MR description contains a **Test plan** section with checklist items. These
-are promises the author made about what would be verified. The reviewer MUST
-work through every item:
+
+The MR description contains a **Test plan** section with checklist items.
+Apply the **test plan convention** from Step 2 — first classify, then act.
 
 1. **Parse** each `- [ ]` item from the MR description.
-2. **Verify** each item by actually performing the check — read files, run
-   commands, cross-reference code. Do not assume items are satisfied; prove it.
-3. **Classify** each item:
-   - **Verified** — the check passes. Update the MR description to mark it
-     `- [x]` via `glab api "projects/<id>/merge_requests/<iid>" -X PUT -f "description=..."`.
-   - **Failed** — the check does not pass. Post a `[Warning]` discussion
-     explaining what failed and how to fix it.
-   - **Cannot verify** — the check requires manual/browser testing or external
-     access the reviewer does not have. Post a general note explaining what
-     could not be verified and why, so the author knows to check manually.
-4. Never leave test plan items unchecked without explanation.
+2. **Classify** each item as a pre-merge gate (no tag) or a deploy-time gate
+   (tagged `[deploy-time](LINK)`).
+3. **Apply the refuse-to-recommend-merge rules** from Step 2 first. If any
+   fail, post the appropriate `[Critical]` / `[Warning]` discussion and
+   stop the merge path — do not proceed to verification of the remaining
+   items in this turn; let the author fix the test plan first.
+4. **For each pre-merge gate:** actually run the command or perform the
+   check. Do not assume; prove it.
+   - **Green** — update the MR description to mark it `- [x]` via
+     `glab api "projects/<id>/merge_requests/<iid>" -X PUT -f "description=..."`.
+   - **Failed** — post a `[Warning]` discussion explaining what failed and
+     how to fix it. Do not tick.
+   - **Could not run** (genuinely missing tooling on the reviewer's box,
+     not "I didn't try") — post a note naming the tool and why; ask the
+     author to verify locally. Do not tick.
+5. **For each deploy-time gate:** never run it, but **edit the MR
+   description in place** to append `(verification deferred to <link>)` so
+   readers immediately see the audit trail without parsing tags. Use the
+   same `glab api … PUT description=…` mechanism.
+6. Never silently leave a pre-merge item unchecked. Every unchecked
+   pre-merge item must have either a `[Warning]` discussion or a
+   "could not run" note attached to it.
 
 ## Step 4 — Post findings as MR discussions
 
@@ -225,6 +269,7 @@ Print:
 - Do NOT post findings for issues already caught by pre-commit hooks (pure formatting, trailing whitespace) — those are already gated locally.
 - Focus the review on things static analysis and linters CANNOT catch: logic errors, architectural violations, security design flaws, missing validation at system boundaries, HIPAA compliance gaps.
 - **Always run Step 3h (Test Plan Verification)**, even for docs-only or trivially small diffs. The test plan is a contract — skipping it is a review failure.
+- **Rationalizations to refuse:** "I noted in my summary that the items are deploy-time, that's enough" — no, edit the description. "All items are deploy-time but I trust the author" — no, refuse to merge until they add a pre-merge gate. "The MR is small so the test plan rules don't apply" — they apply universally. "I'll mark `[x]` because the code looks like it should pass the gate" — never; only tick what you actually ran.
 - For docs-only diffs, the code review categories (3a–3g) can be abbreviated, but the test plan (3h) and a summary (Step 5) are still mandatory.
 - **Parallel security audit:** When spawned from `/cprgitlab`, a separate
   security agent runs `/security-audit-mr` in parallel. Both agents post

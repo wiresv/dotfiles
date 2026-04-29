@@ -70,8 +70,15 @@ Write an MR title and body following this repo's conventions (peek at recent mer
 - <1-3 bullets covering what changed and why>
 
 ## Test plan
-- [ ] <bulleted checklist of what was verified or still needs verifying>
+- [ ] <pre-merge gate 1 — verifiable from a fresh clone, e.g. build / type-check / unit test>
+- [ ] <pre-merge gate 2>
+- [ ] [deploy-time](<URL to tracking issue>) <verification that needs real secrets / a deployed service / external system>
 ```
+
+**Test plan convention** (the reviewer enforces this — the MR will be blocked if you violate it):
+- **At least one item must be a pre-merge gate** verifiable from a fresh clone with no external services, no secrets, no deployed env. Examples: `composer phpstan`, `npm run lint:js`, `docker compose build <service>`, `composer phpunit-isolated`, `python -m pytest tests/unit -m 'not eval'`, `python -m compileall <pkg>`, schema validation, lint on changed files. There is *always* something verifiable from the branch alone — even a build or import-check counts.
+- **Items requiring real secrets, a deployed service, external systems, or production data** must be tagged `[deploy-time](LINK)` where `LINK` is the issue tracking the verification (typically the Linear deploy issue you should also create at this point). The reviewer will leave these unchecked but annotate the description in place so the audit trail is honest.
+- **Common mistake** (do not repeat): writing every item as `curl https://prod/...` or "run eval suite against prod". That MR will get pushed back. If the only thing you can think to test is the live service, add a build / import / unit-fixture gate to the plan as well — and create the deploy tracking issue before opening the MR.
 
 Do not append trailers, signatures, or "Generated with" lines.
 
@@ -162,10 +169,28 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
    e. Testing (new paths covered, data providers have @codeCoverageIgnore)
    f. PHPStan L10 compliance (no @var casts, no new baseline entries)
    g. Style (conventional commits, file headers, 4-space indent)
-7. Parse the MR description's Test Plan items. Verify EVERY item:
-   - Verified: mark it [x] via glab api PUT on the MR description
-   - Failed: post a [Warning] discussion explaining what failed
-   - Cannot verify: post a note explaining why
+7. Parse the MR description's Test Plan items and apply the test plan convention:
+   - Each item is either a **pre-merge gate** (default, no tag — runnable from
+     a fresh clone with no external services) or a **deploy-time gate**
+     (tagged `[deploy-time](LINK)`).
+   - **Refuse-to-merge rules — enforce these BEFORE running any item:**
+     - If the test plan has zero pre-merge gates, post a [Critical] discussion
+       asking the author to add one (build, type-check, unit test, lint, etc.)
+       and DO NOT merge this iteration. Fix-loop will not unblock this — only
+       the author can.
+     - If a [deploy-time] item has no tracking link, post a [Warning] asking
+       the author to add one. DO NOT merge until they do.
+   - For each pre-merge gate: actually run it. Verified → mark `[x]` via
+     glab api PUT on the MR description. Failed → post [Warning] discussion,
+     do not tick. Could not run because of genuinely missing tooling on this
+     box → post a note explaining what is missing, do not tick.
+   - For each [deploy-time] item: never run it; instead, edit the MR
+     description in place to append `(verification deferred to <link>)` after
+     the bullet, so anyone reading the MR sees the audit trail without
+     decoding tags.
+   - Never silently leave a pre-merge item unchecked. Every unchecked
+     pre-merge item must have either a [Warning] discussion or a "could not
+     run" note attached to it.
 
 ## Post findings (Step 3)
 8. For each finding, post an MR discussion via:
@@ -185,13 +210,21 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
 
 ## Merge (Step 5) — only when all discussions are resolved
 16. Verify: all discussions resolved AND no new findings on latest diff.
-17. Before merging, check for a "Security Audit Summary" note on the MR
+17. **Test plan gate (refuse-to-merge):** verify all of these before merging:
+    - The MR has at least one pre-merge gate.
+    - Every pre-merge gate is either ticked `[x]` (because you ran it green)
+      or has an attached [Warning] / "could not run" discussion.
+    - Every `[deploy-time]` item has a tracking link AND has been annotated
+      in the description with `(verification deferred to <link>)`.
+    If any of these fail, do NOT merge. Post a [Critical] discussion naming
+    the violation and stop.
+18. Before merging, check for a "Security Audit Summary" note on the MR
     (glab api "projects/{project_id}/merge_requests/{iid}/notes").
     If absent, wait up to 3 minutes (check every 60s). If still absent,
     proceed but post a note: "Merged without security audit completion.
     Review security findings if they appear post-merge."
-18. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
-19. Post final summary: how many findings addressed, iterations taken.
+19. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
+20. Post final summary: how many findings addressed, iterations taken.
 
 ## Rules
 - Never fabricate findings. Zero findings is a valid outcome.
@@ -199,6 +232,11 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
 - For docs-only diffs, abbreviate code review but ALWAYS verify test plan items.
 - Do not fix [Suggestion] items unless trivial. Focus on [Critical] and [Warning].
 - If after 3 iterations unresolved findings remain, post a summary and stop WITHOUT merging.
+- **Test plan rationalizations to refuse:**
+  - "I noted in my summary that the items are deploy-time, that's enough" — no, edit the description in place.
+  - "All items are deploy-time but I trust the author" — no, refuse to merge until they add a pre-merge gate.
+  - "The MR is small / docs-only, the test plan rules don't apply" — they apply universally. The author still has to commit to *something* verifiable.
+  - "I'll mark `[x]` because the code looks like it should pass the gate" — never; only tick what you actually ran green.
 ```
 
 ### Spawn the security audit agent
