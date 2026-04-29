@@ -185,8 +185,13 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
 
 ## Merge (Step 5) — only when all discussions are resolved
 16. Verify: all discussions resolved AND no new findings on latest diff.
-17. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
-18. Post final summary: how many findings addressed, iterations taken.
+17. Before merging, check for a "Security Audit Summary" note on the MR
+    (glab api "projects/{project_id}/merge_requests/{iid}/notes").
+    If absent, wait up to 3 minutes (check every 60s). If still absent,
+    proceed but post a note: "Merged without security audit completion.
+    Review security findings if they appear post-merge."
+18. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
+19. Post final summary: how many findings addressed, iterations taken.
 
 ## Rules
 - Never fabricate findings. Zero findings is a valid outcome.
@@ -196,11 +201,62 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
 - If after 3 iterations unresolved findings remain, post a summary and stop WITHOUT merging.
 ```
 
-After spawning the agent, print:
+### Spawn the security audit agent
+
+Use the `Agent` tool to spawn an independent security auditor in a second
+isolated worktree. This runs in parallel with the review agent above.
+
+```
+Agent({
+  name: "MR-<iid>-security",
+  description: "Security audit MR !<iid>",
+  isolation: "worktree",
+  run_in_background: true,
+  prompt: <see below>
+})
+```
+
+**The security agent prompt must be self-contained** — same principle as the
+review agent. Include all MR context values:
+
+```
+You are an independent security auditor. Perform a deep security audit of MR !{iid}.
+
+## Setup
+- Branch: {branch_name}
+- Target: {default_branch}
+- MR URL: {mr_url}
+- Project ID: {project_id}
+
+1. Check out the branch: git checkout {branch_name}
+2. Read CLAUDE.md for the project's coding standards and security conventions.
+3. Read the security audit methodology from ~/.claude/skills/security-audit-mr/SKILL.md
+4. Follow the skill's methodology exactly — all steps from Step 1 onward.
+
+## Context
+This is OpenEMR — a medical records system subject to HIPAA. Patient data (PHI)
+handling is critical. A general code review agent runs in parallel — your job
+is the deep security audit only.
+
+## Key values
+- MR iid: {iid}
+- Project ID: {project_id}
+
+## Rules
+- Only report findings with confidence >= 0.7
+- Only HIGH and MEDIUM severity (no LOW)
+- Apply all hard exclusions from the skill file
+- Post findings as MR discussions with **[Critical]** or **[Warning]** prefix
+- Do NOT fix code, push commits, or merge — only audit and report
+- Zero findings is a valid outcome. Never fabricate.
+```
+
+After spawning both agents, print:
 
 ```
 Review agent spawned for MR !<iid> in background worktree.
-You will be notified when the review-fix-merge cycle completes.
+Security audit agent spawned for MR !<iid> in background worktree.
+You will be notified when both complete.
 ```
 
 **Do NOT run `/review-mr` yourself.** Do NOT wait for the agent to complete.
