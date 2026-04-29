@@ -42,9 +42,23 @@ Parse the MR JSON to extract:
 
 Abort if no MR found or current branch is the default branch.
 
+After identifying the target branch, refresh the remote-tracking ref. The
+local ref for the default branch is **untrustworthy** in worktree-based
+workflows: it often lags `origin/<target>` because the main repo's branch
+isn't fast-forwarded between sessions. Diffing against the local ref produces
+an inflated audit scope (other people's already-merged commits look like
+they're part of the MR). Run:
+
+```bash
+git fetch origin <target>
+```
+
+Use `origin/<target>` (not bare `<target>`) in **every** `git diff` and
+`git log` call throughout this skill.
+
 ## Step 2 — Early exit for non-code changes
 
-Run `git diff <target>...HEAD --name-only` and check the file extensions.
+Run `git diff origin/<target>...HEAD --name-only` and check the file extensions.
 
 If the diff contains **only** documentation files (`.md`, `.txt`, `.rst`,
 `.adoc`) and no code files (`.php`, `.js`, `.ts`, `.twig`, `.html`, `.sql`,
@@ -63,8 +77,8 @@ Otherwise, continue.
 ## Step 3 — Gather diff context
 
 Run these in parallel:
-- `git diff <target>...HEAD` — full diff
-- `git diff <target>...HEAD --stat` — file overview
+- `git diff origin/<target>...HEAD` — full diff
+- `git diff origin/<target>...HEAD --stat` — file overview
 - Read `CLAUDE.md` for the project's security-related conventions
 
 ## Step 4 — Repository security baseline (Phase 1)

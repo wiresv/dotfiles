@@ -17,11 +17,26 @@ If there are *already* committed changes ahead of the base branch but no uncommi
 
 ## Step 2 — Determine base branch and branch state
 
-Run these in parallel:
-- `glab repo view -F json | jq -r .default_branch` — the MR target
+The local ref for the default branch is **untrustworthy** in worktree-based
+workflows: the main repo's `master` (or `main`) is often left at whatever SHA
+was checked out when the worktree was created, while `origin/master` advances
+independently as other MRs land. Diffing against the local ref produces
+inflated MR scopes (other people's already-merged commits look like they're
+part of yours). Use `origin/<base>` everywhere — never bare `<base>`.
+
+First, get the default branch and refresh the remote-tracking ref:
+- `glab repo view -F json | jq -r .default_branch` — the MR target name
+- `git fetch origin <base>` — refresh `origin/<base>` (substitute `<base>`
+  with the name from the previous command)
+
+Then run these in parallel:
 - `git rev-parse --abbrev-ref HEAD` — current branch
 - `git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo "no-upstream"` — upstream tracking
-- `git log --oneline <base>..HEAD` — commits that will be in the MR (use the default branch name from the first command)
+- `git log --oneline origin/<base>..HEAD` — commits that will be in the MR
+
+Use `origin/<base>` (not bare `<base>`) for **all** downstream diff/log
+operations in this skill, and instruct the agent prompts you spawn to do the
+same.
 
 Abort with an explanation if:
 - Current branch *is* the default branch — refuse to open an MR from `main` into `main`. Tell the user to switch to a feature branch first.
@@ -37,7 +52,7 @@ Claude Code worktrees generate random branch names (e.g., `worktree-mighty-sprou
 - Is otherwise clearly non-descriptive of the actual changes
 
 **How to rename:**
-1. Analyze the commits in the MR range (`git log <base>..HEAD` and `git diff <base>...HEAD --stat`) to understand what changed.
+1. Analyze the commits in the MR range (`git log origin/<base>..HEAD` and `git diff origin/<base>...HEAD --stat`) to understand what changed.
 2. Generate a branch name that is:
    - **Brief:** 2–5 words joined by hyphens, ideally under 40 characters total.
    - **Descriptive:** conveys the nature of the change at a glance.
@@ -58,8 +73,8 @@ Claude Code worktrees generate random branch names (e.g., `worktree-mighty-sprou
 ## Step 4 — Draft the MR title and body
 
 Inspect ALL commits in the MR range, not just the latest:
-- `git log <base>..HEAD` for commit messages
-- `git diff <base>...HEAD --stat` for the file-level shape of the change
+- `git log origin/<base>..HEAD` for commit messages
+- `git diff origin/<base>...HEAD --stat` for the file-level shape of the change
 
 Write an MR title and body following this repo's conventions (peek at recent merged MRs with `glab mr list --state merged --per-page 5` if you need a style reference):
 - **Title:** under 70 characters, imperative mood, summarizes the whole branch (not just the last commit).
@@ -146,13 +161,18 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
 - MR URL: {mr_url}
 - Project ID: {project_id} (get via: glab repo view -F json | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
 
-1. Check out the branch: git checkout {branch_name}
+1. Check out the branch and refresh the remote default-branch ref. The local
+   ref for {default_branch} is often stale in worktree-based setups, which
+   would inflate the MR scope to include other already-merged commits. Always
+   diff against origin/{default_branch}, never against the bare local ref.
+       git checkout {branch_name}
+       git fetch origin {default_branch}
 2. Read CLAUDE.md for the project's coding standards — every finding must be
    grounded in those standards.
 
 ## Review (Step 2)
-3. Get the full diff: git diff {default_branch}...HEAD
-4. Get the file overview: git diff {default_branch}...HEAD --stat
+3. Get the full diff: git diff origin/{default_branch}...HEAD
+4. Get the file overview: git diff origin/{default_branch}...HEAD --stat
 5. Read every changed file IN FULL (not just diff hunks) to understand context.
 6. Review against these categories:
    a. Architecture & Design (CLAUDE.md patterns, PSR-4, dependency injection)
@@ -266,7 +286,14 @@ You are an independent security auditor. Perform a deep security audit of MR !{i
 - MR URL: {mr_url}
 - Project ID: {project_id}
 
-1. Check out the branch: git checkout {branch_name}
+1. Check out the branch and refresh the remote default-branch ref. The local
+   ref for {default_branch} is often stale in worktree-based setups, which
+   would inflate the audit scope to include other already-merged commits.
+   The skill instructs you to diff against origin/{default_branch}; honor
+   that by always using `origin/<target>` (never bare `<target>`) in any
+   `git diff` or `git log` calls.
+       git checkout {branch_name}
+       git fetch origin {default_branch}
 2. Read CLAUDE.md for the project's coding standards and security conventions.
 3. Read the security audit methodology from ~/.claude/skills/security-audit-mr/SKILL.md
 4. Follow the skill's methodology exactly — all steps from Step 1 onward.

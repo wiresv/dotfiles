@@ -60,10 +60,21 @@ Abort if:
 
 ## Step 2 — Gather context
 
-Run these in parallel:
-- `git diff <target>...HEAD` — the full diff that will be reviewed
-- `git diff <target>...HEAD --stat` — file-level overview
-- `git log --oneline <target>..HEAD` — commits in the MR
+The local ref for the default branch is **untrustworthy** in worktree-based
+workflows: it often lags `origin/<target>` because the main repo's branch
+isn't fast-forwarded between sessions. Diffing against the local ref produces
+inflated MR scopes (other people's already-merged commits look like part of
+the MR). First refresh the remote-tracking ref, then diff against
+`origin/<target>` (never bare `<target>`):
+
+```bash
+git fetch origin <target>
+```
+
+Then run these in parallel:
+- `git diff origin/<target>...HEAD` — the full diff that will be reviewed
+- `git diff origin/<target>...HEAD --stat` — file-level overview
+- `git log --oneline origin/<target>..HEAD` — commits in the MR
 
 Also extract the MR description from the JSON obtained in Step 1. Parse the
 **Test plan** section — these are verification tasks that the MR author committed
