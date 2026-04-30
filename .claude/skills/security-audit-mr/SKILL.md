@@ -56,6 +56,86 @@ git fetch origin <target>
 Use `origin/<target>` (not bare `<target>`) in **every** `git diff` and
 `git log` call throughout this skill.
 
+## Step 1.5 — Verify the checkout matches the MR head
+
+This step exists because of a real failure mode: the audit's worktree can
+silently land on the wrong commit (e.g., on `origin/<target>` instead of the
+MR's source branch when the spawning session was detached on master). When
+that happens:
+
+- The audit reads master's content, not the fix branch's content.
+- All findings, line citations, and "this code is fine" verdicts are about
+  the wrong code.
+- A false-positive turns into a confusing finding the reviewer must dismiss
+  by hand. **A false-negative — the audit clears a buggy fix branch
+  because it actually read master — produces a silent merge of broken
+  code.** This is the worst outcome on this stack.
+
+**Before doing any analysis, verify your checkout:**
+
+```bash
+# 1. Get the MR's head SHA from GitLab (canonical source of truth).
+MR_HEAD_SHA=$(glab api "projects/<project-id>/merge_requests/<iid>" \
+  | python3 -c "import json,sys; print(json.load(sys.stdin)['sha'])")
+
+# 2. Get the local HEAD SHA.
+LOCAL_HEAD_SHA=$(git rev-parse HEAD)
+
+# 3. Compare. They must match exactly.
+if [ "$MR_HEAD_SHA" != "$LOCAL_HEAD_SHA" ]; then
+  echo "AUDIT ABORT: local HEAD ($LOCAL_HEAD_SHA) does not match MR head ($MR_HEAD_SHA)"
+  # post the abort summary (see below) and exit non-zero
+fi
+```
+
+**If the SHAs differ, abort the audit:**
+
+1. **Do NOT post any security findings.** The audit was looking at the
+   wrong code; any finding would be about a different commit than the
+   reviewer is preparing to merge.
+2. Post a summary note explicitly flagging the integrity failure (the
+   reviewer reads this and refuses to merge):
+
+   ```bash
+   glab api "projects/<project-id>/merge_requests/<iid>/notes" \
+     -X POST \
+     -f "body=## Security Audit Summary
+
+   **AUDIT INTEGRITY FAILURE — could not analyze this MR.**
+
+   The audit's worktree HEAD did not match the MR's head SHA:
+   - Expected (MR head): \`$MR_HEAD_SHA\`
+   - Actual (local HEAD): \`$LOCAL_HEAD_SHA\`
+
+   This means any analysis would have been against the wrong code. The audit
+   has been aborted with **zero findings posted** to prevent a misleading
+   summary. The reviewer must refuse to merge this MR until a fresh audit
+   runs against the correct commit.
+
+   Likely cause: the spawning session's worktree was detached on a different
+   commit when the agent was spawned, and the agent's \`git checkout
+   <source-branch>\` either failed silently or did not produce the expected
+   tree.
+
+   _Audit performed by Claude Code (\`/security-audit-mr\`)._"
+   ```
+
+3. Exit. Do not proceed to Steps 2 onward.
+
+The reviewer's runbook (in `~/.claude/skills/cprgitlab/SKILL.md`) has the
+matching counterpart: when the reviewer reads the audit summary and sees
+"AUDIT INTEGRITY FAILURE", it refuses to merge and surfaces the issue for
+manual investigation.
+
+**Belt-and-suspenders:** the reviewer also performs the same SHA check at
+its own startup; both halves of the contract independently verify their
+checkouts. A single audit-side check can fail silently if the audit agent
+itself is buggy; both sides checking gives true defense in depth.
+
+If the SHAs match, proceed to Step 2 normally. **Always include the audited
+SHA in the final summary note** (Step 10) so the reviewer has a paper
+trail.
+
 ## Step 2 — Early exit for non-code changes
 
 Run `git diff origin/<target>...HEAD --name-only` and check the file extensions.
@@ -195,6 +275,62 @@ finding, trace the data flow from input to sensitive operation.
   or `src/Common/Csrf/`, escalate — grep for all callers of changed functions
   and verify the change does not weaken existing security guarantees.
 
+### 6g. Functional defects in security primitives (fail-closed bugs)
+
+This category exists because of a real recurrence: the audit's docs-research
+phase often surfaces a discrepancy between the code and the canonical
+reference (AWS Service Authorization Reference, RFC, vendor SDK contract)
+where the code is **broken in a way that fails closed** — the security
+primitive doesn't actually function, but the failure mode is
+denial-of-service or denial-of-feature, not exploitable permission widening.
+Historically these were buried in a "note for the parent agent" inside the
+summary, missed by the reviewer, and surfaced only as post-merge follow-up
+MRs. That pattern is no longer acceptable.
+
+**A finding belongs in this category when ALL of the following hold:**
+1. The audit's research against an authoritative external reference
+   established a discrepancy between code and documented behavior.
+2. The discrepancy concerns a security primitive (IAM condition key, ACL
+   check, signature verification, TLS verification flag, crypto mode
+   parameter, OAuth scope, JWT claim, condition operator, etc.).
+3. The runtime effect is functional breakage of that primitive — the
+   primitive denies legitimate requests, rejects valid signatures, fails to
+   match the resource it should match. **Crucially: the failure mode is
+   fail-closed, not fail-open.** A fail-open functional defect is a HIGH
+   security finding and goes in the appropriate prior category (auth bypass
+   under 6b, signature bypass under 6c, etc.).
+
+**Examples that fit:**
+- IAM condition key namespace mismatch (`ec2:ResourceTag/` used on an
+  `ssm:` action where only `aws:ResourceTag/` is honored — IAM treats the
+  unknown key as unmet, denies every legitimate call).
+- An ACL check function that always returns `false` because of a typo in
+  the role name lookup.
+- A JWT validator that rejects every well-formed token because the audience
+  check uses string equality on a base64 value vs. its decoded form.
+- TLS pinning code that mismatches every cert because the pin is computed
+  from the leaf cert but compared against the intermediate.
+
+**Examples that do NOT fit (handle elsewhere):**
+- A typo that makes an ACL check always return `true` → 6b auth bypass,
+  HIGH.
+- A signature verifier that accepts any signature → 6c crypto, HIGH.
+- A code style issue or maintainability concern → not a security finding,
+  do not surface.
+
+**Severity and posting:** these findings are **MEDIUM severity, posted as
+`[Warning]` discussions on the MR** at the standard >= 0.7 confidence
+threshold. They do NOT bypass the confidence and exclusion gates above.
+What changes is the *channel*: a 6g finding is a discussion, not a
+summary side-note. The author/reviewer fix loop addresses it on the same
+MR before merge. The audit summary may reference it but must not be the
+only place it appears.
+
+**Rule of thumb:** if you find yourself writing "worth surfacing to
+`/review-mr`" or "for the parent agent's attention" or "should flag in
+review", you are looking at a 6g finding — post it as a discussion, not a
+summary footnote.
+
 ## Step 7 — Confidence scoring and filtering
 
 For each potential finding from Step 6, assign a confidence score:
@@ -297,6 +433,17 @@ and line.
 Post findings one at a time — each discussion thread must be independently
 resolvable by `/fix-review`.
 
+**No summary side-notes for actionable findings.** Anything you would write
+under a "note for the parent agent", "worth surfacing to review", or
+similar header inside the audit summary belongs as a discussion instead.
+If the finding meets the confidence and severity thresholds (including the
+6g category for fail-closed functional defects in security primitives),
+post it as a `[Warning]` or `[Critical]` discussion. If it does not meet
+the thresholds, do not surface it at all — the reviewer is not a
+secondary triage channel for sub-threshold concerns. This rule exists
+because side-note findings race with the reviewer's merge timer and
+historically arrived too late to act on.
+
 ## Step 10 — Post security audit summary
 
 After all findings are posted (or if none were found), post a summary note:
@@ -306,6 +453,8 @@ glab api "projects/<project-id>/merge_requests/<iid>/notes" \
   -X POST \
   -f "body=## Security Audit Summary
 
+**Audited SHA:** \`$LOCAL_HEAD_SHA\` (verified against MR head in Step 1.5)
+
 | Category | Findings |
 |----------|----------|
 | Input Validation | N |
@@ -314,6 +463,7 @@ glab api "projects/<project-id>/merge_requests/<iid>/notes" \
 | Injection & Code Exec | N |
 | Data Exposure / HIPAA | N |
 | OpenEMR-Specific | N |
+| Functional defects in security primitives (6g) | N |
 
 **Files audited:** N
 **Confidence threshold:** >= 0.7 (findings below this suppressed)

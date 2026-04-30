@@ -192,6 +192,25 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
    diff against origin/{default_branch}, never against the bare local ref.
        git checkout {branch_name}
        git fetch origin {default_branch}
+1.5. **Verify your checkout matches the MR head before reviewing.** A real
+     failure mode on this stack: the spawned worktree silently lands on the
+     wrong commit (e.g., on origin/{default_branch} instead of the source
+     branch when the spawning session was detached on master). Reviewing
+     the wrong code produces silently misleading reports. Verify:
+         MR_HEAD_SHA=$(glab api "projects/{project_id}/merge_requests/{iid}" \
+           | python3 -c "import json,sys; print(json.load(sys.stdin)['sha'])")
+         LOCAL_HEAD_SHA=$(git rev-parse HEAD)
+         if [ "$MR_HEAD_SHA" != "$LOCAL_HEAD_SHA" ]; then
+           # post a [Critical] discussion: "REVIEWER INTEGRITY FAILURE — local
+           # HEAD does not match MR head ($LOCAL_HEAD_SHA vs $MR_HEAD_SHA).
+           # Refusing to review or merge until a fresh agent runs against the
+           # correct commit."
+           # Then exit without merging.
+         fi
+     The audit's runbook (~/.claude/skills/security-audit-mr/SKILL.md
+     Step 1.5) does the same check on its own side. Both halves of the
+     contract independently verify; a single-side check can fail silently
+     if the agent itself is buggy.
 2. Read CLAUDE.md for the project's coding standards — every finding must be
    grounded in those standards.
 
@@ -267,9 +286,39 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
     the violation and stop.
 18. Before merging, check for a "Security Audit Summary" note on the MR
     (glab api "projects/{project_id}/merge_requests/{iid}/notes").
-    If absent, wait up to 3 minutes (check every 60s). If still absent,
-    proceed but post a note: "Merged without security audit completion.
-    Review security findings if they appear post-merge."
+    The audit is a **hard merge gate** — never merge without it. The
+    historical 3-minute soft cap raced with the audit on docs-research-
+    heavy MRs (the audit posts the summary at the end after researching
+    AWS / vendor references); the reviewer would merge before the audit
+    surfaced its findings, and any issue the audit caught would have to
+    ship as a follow-up MR. This is not acceptable.
+
+    Wait policy:
+    - Poll every 60s until the summary note appears, up to a 15-minute
+      hard cap.
+    - If the summary appears, **read its body** before merging. Two
+      specific signals to act on:
+      a. **AUDIT INTEGRITY FAILURE** anywhere in the body — this means
+         the audit detected its own checkout was on the wrong commit
+         (Step 1.5 of `security-audit-mr/SKILL.md`) and aborted with
+         zero findings. The clean-looking summary is meaningless. **Do
+         not merge.** Post a [Critical] discussion ("security audit
+         aborted on integrity check; the audit looked at the wrong
+         commit. Do not merge until a fresh audit runs against
+         {head_sha}.") and stop.
+      b. Even on a zero-findings summary, scan for any "note for the
+         parent agent", "for review", "worth surfacing" or similar
+         phrasing — if you see it, treat it as you would a [Warning]
+         discussion: open a fresh fix iteration to address it before
+         merging.
+      c. The summary should include an "Audited SHA" line that matches
+         {head_sha}. If it does not match, that is also an integrity
+         failure — refuse to merge.
+    - If the 15-minute cap is hit with no summary, **do not merge.**
+      Post a [Critical] discussion ("security audit did not complete
+      within 15 min — investigate the audit agent rather than merging
+      blind") and stop. Surface this to the user through the MR; do not
+      treat it as a routine timeout.
 19. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
 20. **Linear hygiene (post-merge).** For each `Closes TODO-XX` or `Refs TODO-XX` line in the merged MR description:
     - For `Closes`: mark the issue Done via the Linear MCP (`mcp__linear-server__save_issue` with `state: "Done"`). Tick acceptance-criteria checkboxes that the merged code satisfies (mutate the issue's description with the boxes checked).
@@ -327,7 +376,10 @@ You are an independent security auditor. Perform a deep security audit of MR !{i
        git fetch origin {default_branch}
 2. Read CLAUDE.md for the project's coding standards and security conventions.
 3. Read the security audit methodology from ~/.claude/skills/security-audit-mr/SKILL.md
-4. Follow the skill's methodology exactly — all steps from Step 1 onward.
+4. Follow the skill's methodology exactly — all steps from Step 1 onward,
+   including **Step 1.5 (verify checkout matches MR head)**. If your local
+   HEAD does not match the MR's head SHA, abort the audit, post the
+   AUDIT INTEGRITY FAILURE summary, and exit. Do NOT post any findings.
 
 ## Context
 This is OpenEMR — a medical records system subject to HIPAA. Patient data (PHI)
