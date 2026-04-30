@@ -3,6 +3,8 @@ name: correct
 description: Deep correctness audit of recent changes. Verifies every change is logically sound, consistent, and introduces no regressions. Fixes all issues found.
 ---
 
+Think hard. The bar for this audit is extreme certainty — not "looks correct," not "probably fine," but verified. Correctness, diligence, and comprehensiveness are non-negotiable here. Every change must be proven, not assumed. Do not make mistakes. If you make one, catch it and correct it before moving on.
+
 Stop and shift into a slower, more deliberate mode. The work you are about to
 review is foundational. Errors here compound — they become assumptions that
 later code builds on, tests validate against, and users depend on. The cost of

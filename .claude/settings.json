@@ -109,6 +109,5 @@
   "effortLevel": "high",
   "autoMemoryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
-  "theme": "light-daltonized",
-  "skipAutoPermissionPrompt": true
+  "theme": "light-daltonized"
 }
