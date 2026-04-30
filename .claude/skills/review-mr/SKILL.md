@@ -282,6 +282,35 @@ Print:
 - **Always run Step 3h (Test Plan Verification)**, even for docs-only or trivially small diffs. The test plan is a contract — skipping it is a review failure.
 - **Rationalizations to refuse:** "I noted in my summary that the items are deploy-time, that's enough" — no, edit the description. "All items are deploy-time but I trust the author" — no, refuse to merge until they add a pre-merge gate. "The MR is small so the test plan rules don't apply" — they apply universally. "I'll mark `[x]` because the code looks like it should pass the gate" — never; only tick what you actually ran.
 - **Evaluate gate quality, not just gate exit code.** Run each pre-merge gate and observe what it actually tests. If the command runs green but doesn't actually exercise the invariant the bullet claims (e.g., `grep -F "FILENAME" path/FILENAME` searches file content for a literal string when the bullet's intent was to confirm the file exists at that path; or `split('foo')[0]` truncates earlier than expected because `foo` also appears in comments), post a `[Warning]` discussion explaining the gate is broken even if the underlying claim happens to be true. Validate the underlying claim some other way before ticking — never silently rubber-stamp a gate whose failure mode you couldn't articulate. The repo's CLAUDE.md "Authoring pre-merge gates" subsection has a concrete anti-pattern catalog of bugs to look for.
+
+### Linear hygiene contract (reviewer side)
+
+The author's `/cprgitlab` workflow includes a `Closes TODO-XX` or `Refs TODO-XX` line in the MR body. The reviewer enforces the contract on three checkpoints:
+
+**At review time (Step 3 territory):**
+
+1. Parse the MR description for `Closes TODO-XX` / `Refs TODO-XX` lines.
+2. If the diff is non-trivial (more than typo / lint cleanup) and there is **no Linear linkage**, post a `[Warning]` discussion asking the author to file or link an issue. Do not merge until they do.
+3. If linkage exists, fetch the referenced issue via the Linear MCP (`mcp__linear-server__get_issue`) and read its description + acceptance criteria. Compare against the actual diff:
+   - File paths the issue describes that aren't in the diff → drift; post a `[Warning]` asking the author to update either the issue description or the MR scope.
+   - Acceptance criteria the diff doesn't satisfy → drift; same.
+   - Issue says "implement X" but MR also includes unrelated work Y → ask the author to either split the MR or file a separate issue for Y.
+
+**At merge time (Step 5 territory) — after `glab mr merge` succeeds:**
+
+For each `Closes TODO-XX` / `Refs TODO-XX` line:
+
+- For `Closes`: mark the issue Done via `mcp__linear-server__save_issue` with `state: "Done"`. Tick acceptance-criteria checkboxes that the merged code satisfies (mutate the issue's description with boxes checked).
+- For `Refs`: leave the issue's status as "In Progress" if there's remaining work; post a one-line Linear comment via `mcp__linear-server__save_comment` summarizing what this MR contributed and what remains.
+- Either way: post a single Linear comment on the issue with the merge SHA, the MR URL, and a one-line summary. This builds a per-issue audit trail showing every MR that touched it.
+
+**If the merged MR has no Linear linkage** (you flagged it earlier and the author argued it's a true trivial cleanup): merge anyway, but include a one-line note in the MR final summary saying "no Linear linkage; reviewer accepted as trivial cleanup."
+
+**Rationalizations to refuse:**
+
+- "I already noted in my review that the issue should be closed; that's enough." — no, actually mark it Done via the MCP. The audit trail lives in Linear, not in MR comments.
+- "The author will close the issue themselves." — they often won't, and Linear drift compounds. The reviewer is the last actor with full context; the responsibility is yours.
+- "The acceptance criteria boxes are out of date / wrong." — fix them in the issue description before merging, then tick what's now correct.
 - For docs-only diffs, the code review categories (3a–3g) can be abbreviated, but the test plan (3h) and a summary (Step 5) are still mandatory.
 - **Parallel security audit:** When spawned from `/cprgitlab`, a separate
   security agent runs `/security-audit-mr` in parallel. Both agents post

@@ -96,6 +96,30 @@ Write an MR title and body following this repo's conventions (peek at recent mer
 - **Common mistake** (do not repeat): writing every item as `curl https://prod/...` or "run eval suite against prod". That MR will get pushed back. If the only thing you can think to test is the live service, add a build / import / unit-fixture gate to the plan as well — and create the deploy tracking issue before opening the MR.
 - **Test the test before pasting it.** Bad gates that *false-pass* (return 0 when the invariant doesn't hold) silently let regressions through. Bad gates that *false-fail* erode trust in the convention. For every gate, mentally run it against both an "invariant holds" state and an "invariant violated" state — if you can't picture both, pick a simpler gate. The repo's CLAUDE.md "Authoring pre-merge gates" subsection has a concrete anti-pattern catalog (real bugs from this repo's MR history) and a step-by-step gate-authoring procedure. Read it before authoring test plans for any non-trivial MR. Especially relevant for agent-authored MRs: the most common failure mode is "I wrote what I meant, not what the command does" (e.g. `grep -F "FILENAME" path/FILENAME` searches the *content* for the literal string; `split('foo')[0]` truncates on the first `'foo'` in the file, including in comments).
 
+### Linear hygiene contract (author side)
+
+Every MR that addresses a tracked Linear issue **must** state the linkage in the description, on its own line at the top of the body:
+
+```
+Closes TODO-37
+```
+
+or, for partial work that doesn't fully close the issue:
+
+```
+Refs TODO-37
+```
+
+Multiple issues are allowed (one per line). The reviewer parses this to update Linear after merging. **MRs without a Linear linkage are allowed only for trivial cleanup** (typo fixes, lint-only changes); the reviewer will ask why if the diff is non-trivial and unlinked, and you should either link an existing issue or file a new one before continuing.
+
+Before opening the MR, **set the linked issue's status to "In Progress"** via:
+
+```sh
+glab api graphql -f query='mutation { issueUpdate(id: "TODO-XX", input: { stateId: "<in-progress-state-id>" }) { success } }'
+```
+
+(Or via the Linear MCP if you're authoring through Claude Code.) This signals to anyone watching the queue that the issue is being worked on, not still pending pickup.
+
 Do not append trailers, signatures, or "Generated with" lines.
 
 ## Step 5 — Create the MR
@@ -190,6 +214,8 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
    e. Testing (new paths covered, data providers have @codeCoverageIgnore)
    f. PHPStan L10 compliance (no @var casts, no new baseline entries)
    g. Style (conventional commits, file headers, 4-space indent)
+7a. **Linear linkage check.** Parse the MR description for `Closes TODO-XX` or `Refs TODO-XX` lines. If the diff is non-trivial (anything beyond pure cleanup / typos / lint) and there is NO linkage, post a [Warning] discussion asking the author to file or link an issue. If the linkage exists, fetch the referenced issue(s) via the Linear MCP / `glab` and check that the MR's actual diff matches what the issue describes. Drift between the issue's "Implementation" / acceptance criteria and the diff → [Warning] with a suggested edit to either the issue or the MR description.
+
 7. Parse the MR description's Test Plan items and apply the test plan convention:
    - Each item is either a **pre-merge gate** (default, no tag — runnable from
      a fresh clone with no external services) or a **deploy-time gate**
@@ -245,7 +271,11 @@ You are an independent code reviewer. Review, fix, and merge MR !{iid}.
     proceed but post a note: "Merged without security audit completion.
     Review security findings if they appear post-merge."
 19. Merge: glab mr merge {iid} --squash --remove-source-branch --yes
-20. Post final summary: how many findings addressed, iterations taken.
+20. **Linear hygiene (post-merge).** For each `Closes TODO-XX` or `Refs TODO-XX` line in the merged MR description:
+    - For `Closes`: mark the issue Done via the Linear MCP (`mcp__linear-server__save_issue` with `state: "Done"`). Tick acceptance-criteria checkboxes that the merged code satisfies (mutate the issue's description with the boxes checked).
+    - For `Refs`: leave the status as "In Progress" if the issue still has remaining work; post a one-line Linear comment summarizing what this MR contributed and what remains.
+    - Either way: post a single Linear comment on the issue with the merge SHA, the MR URL, and a one-line summary of what shipped. Use the Linear MCP `save_comment` if available, or `glab api` for the MR-side cross-link.
+21. Post final summary on the MR: how many findings addressed, iterations taken, **and which Linear issues were updated**.
 
 ## Rules
 - Never fabricate findings. Zero findings is a valid outcome.
