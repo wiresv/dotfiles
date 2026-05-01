@@ -25,12 +25,13 @@ Short, clever, "elegant" code is *not* automatically simple. A four-line metapro
 
 These are sharp on purpose. Apply them by default. The "when this bends" notes appear only on principles whose exceptions are non-obvious.
 
-- **YAGNI — You Aren't Gonna Need It.** Build only what is required by a real requirement that exists today. Speculative features, options, and abstractions get cut.
+- **YAGNI — You Aren't Gonna Need It.** Build only what is demanded by a real requirement today — and **every requirement needs a human name attached to it.** "The spec," "the team," "best practices," "industry standard" are not sources; people are. If you can't name the person who needs it and the concrete problem they're solving, the requirement is a guess. Cut speculative features, options, and abstractions first; question even the surviving ones, because smart-sounding requirements are routinely wrong by a wide margin.
 - **Rule of Three.** Don't extract an abstraction until you have at least three real, divergent uses. Two cases is a coincidence; three is a pattern. *When this bends:* a true external boundary (HTTP, plugin, public API, persistence schema) — extract once, because the boundary itself is the abstraction.
 - **The best code is no code.** The cheapest line is the one you didn't write. Before writing, look for: deletion, the standard library, code already present in the codebase.
 - **Boring technology wins.** Prefer the language's standard tools, the framework's intended path, and the dependency everyone already uses. Novelty has a tax paid every day.
 - **Inline before extract.** Write the three lines inline. If the same shape appears a third time, unchanged, *then* extract.
 - **Make it work, then make it right, then (maybe) make it fast.** In that order. Optimization without measurement is fiction.
+- **The order is: question → delete → simplify → accelerate → automate.** *In that order.* First challenge whether the requirement, the code, or the process should exist at all. Then delete what survives — aggressively enough that you have to add ~10% of it back later; if nothing ever needs adding back, you under-cut. Only *then* simplify what remains. Only *then* tighten its feedback loop (faster tests, faster deploy, shorter iteration). Only *last* automate. Optimizing or automating something that should have been deleted is the most expensive form of waste in software: you build scaffolding around the mistake and make it harder to remove.
 - **The simplest thing that could possibly work.** Solve the actual problem in front of you. Not the generalized version. Not the configurable version. The actual one.
 - **Reversibility before flexibility.** A reversible decision needs no flexibility built in — you can change it later cheaply. Flexibility ("we might want to swap X someday") is complexity you pay for now to avoid a cost you may never incur.
 - **Minimum viable surface area.** Public functions, exported types, config options, CLI flags, environment variables — every one of these is a contract you'll have to keep. Expose the smallest set that satisfies real callers.
@@ -71,6 +72,8 @@ When you notice yourself about to do any of these, **stop and choose the simpler
 **Comment-driven complexity.** Long block comments explaining why a tangled piece of code is necessary. → The complexity is the bug. Simplify until the comment isn't needed.
 
 **Future-proofing for hypothetical scale.** Sharding, caching layers, queues, and read replicas added before measured load demands them. → Solve the load you have. Architectural fixes for imagined load are guesses with debt attached.
+
+**Optimizing or automating code that should be deleted.** Speeding up a slow query in a feature nobody uses. Writing a code generator for boilerplate that an inlined helper would erase. Adding a lint rule, a CI step, or a script to babysit complexity that wouldn't exist if the underlying thing were cut. Caching responses from an endpoint that shouldn't be called in the first place. → Move up the stack first. Ask whether the work, the feature, or the process should exist at all. Only optimize or automate what has already survived deletion.
 
 ## Decision heuristics
 
@@ -162,6 +165,8 @@ When any of these surface, you are rationalizing. Stop.
 | "This is elegant." | This is clever. | Choose obvious over clever. |
 | "It's the same pattern we used before." | The shape matches; the meaning may not. | Compare meanings, not shapes, before unifying. |
 | "I'll generalize while I'm in here." | Scope creep dressed as efficiency. | Make the change you came to make. Open a separate change for anything else. |
+| "Let me speed this up / automate this annoying step." | I may be optimizing or automating what I should be deleting. | First try to remove or simplify the underlying work. Only accelerate or automate what survives that cut. |
+| "The spec / the team / best practice says we need this." | I'm citing an authority instead of a person. | Find the human whose actual problem this solves, or treat the requirement as a guess and cut. |
 
 ## Closing posture
 

@@ -14,10 +14,10 @@ Rename the current tmux window to a short label that tells the human orchestrato
    - `git status --short` — uncommitted work
 
 2. **Synthesize a label** from what you know: the branch name, recent commits, any uncommitted work, and the conversation so far. The label must be:
-   - **Ultra-short:** 3–6 words max, under 30 characters ideal. This appears in the tmux status bar — every character counts.
+   - **Ultra-short: 15 characters or fewer.** Hard cap, not a target. This appears in the tmux status bar — every character counts. Count the characters before renaming. If it's over 15, cut words, drop articles, abbreviate, or pick a tighter framing — don't ship it long.
    - **Glanceable:** a human scanning 5+ windows should instantly know what this one is doing. Lead with the domain/area, not generic verbs.
    - **No decoration:** no emoji, no brackets, no prefix like "WIP:" or "Claude:". Just the substance.
-   - Examples: `CDK infra rules`, `patient API patch`, `calendar date fix`, `phpstan baseline cleanup`, `twig render tests`
+   - Examples (all ≤15 chars): `CDK infra rules`, `patient API`, `calendar fix`, `phpstan cleanup`, `twig tests`, `kiss skill edit`
 
 3. **Rename the window:**
    ```bash
