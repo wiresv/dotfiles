@@ -21,12 +21,14 @@ Rename the current tmux window to a short label that tells the human orchestrato
 
 3. **Rename the window:**
    ```bash
-   tmux rename-window "<label>"
+   tmux rename-window -t "$TMUX_PANE" "<label>"
    ```
+   The `-t "$TMUX_PANE"` is mandatory. Without a target, `tmux rename-window` renames whichever window the user happens to be looking at — not the window containing this Claude Code process. In multi-window workflows that means it silently relabels someone else's window. Targeting by pane id pins the rename to *this* session's window.
 
 4. **Report** — print the label you chose so the user can confirm or ask you to change it. One line, nothing else.
 
 ## Notes
 - If `$TMUX` is empty, we are not in tmux. Say so and stop.
+- If `$TMUX_PANE` is empty (rare — would mean tmux is set but pane id wasn't inherited), say so and stop rather than running an untargeted rename.
 - If the user passes an argument to `/tpane`, use that as the label verbatim instead of generating one.
 - If the session is brand new with no git context yet, derive the label from the conversation topic.
