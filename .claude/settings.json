@@ -85,6 +85,18 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/tpane_first_prompt.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
