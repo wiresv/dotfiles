@@ -64,6 +64,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__linear-server__(get_issue|list_issues)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/tpane_after_linear.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",

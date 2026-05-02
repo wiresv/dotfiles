@@ -17,6 +17,17 @@ find "$marker_dir" -type f -mtime +7 -delete 2>/dev/null
 
 marker="$marker_dir/$session_id"
 [ -e "$marker" ] && exit 0
+
+# If the user's first prompt is generic (e.g., "look at Linear queue", "grab a
+# task"), defer labeling — the actual work isn't known yet. The companion
+# PostToolUse hook (tpane_after_linear.sh) will fire after the agent fetches
+# the Linear issue and inject the rename reminder with real context. Don't set
+# the marker here so a follow-up substantive user prompt can still trigger.
+prompt=$(printf '%s' "$input" | jq -r '.prompt // empty' 2>/dev/null)
+if printf '%s' "$prompt" | grep -qiE 'linear|queue|backlog'; then
+  exit 0
+fi
+
 touch "$marker"
 
 cat <<'EOF'
