@@ -39,7 +39,7 @@ When the four conflict, resolve ONLY in this order:
 - MAKE ILLEGAL STATES UNREPRESENTABLE. Represent mutually exclusive states with closed discriminated unions or state machines. Keep independent facts independent.
 - DEEP MODULES OVER SHALLOW WRAPPERS. Maximize capability behind minimal interface surface area. Add wrappers or delegation layers only for required behavior or a required interface contract.
 - LOCALITY OF BEHAVIOR OVER FRAGMENTATION. Collocate data models, lifecycle logic, and execution flow at the site of use. Do not fracture cohesive code into artificial helper, util, or type folders prematurely.
-- ORTHOGONALITY AND DELETABILITY. Design systems with minimal connascence and surgical blast radiuses so features can be deleted in a single diff without leaving residual glue.
+- ORTHOGONALITY AND DELETABILITY. Minimize unnecessary coupling across implementation, callers, configuration, and operations. Make required dependencies explicit, including ordering, state ownership, and data contracts. Justify architectural simplifications by identifying the concrete dependencies or coordination removed and accounting for complexity introduced elsewhere. Accept additional code when it reduces the total burden of understanding and change under current requirements. Keep features deletable without unrelated changes or residual glue.
 - Understand the relevant end-to-end flow before changing it. Fix the shared cause within the authorized scope.
 - No unrequested CI/CD. Local verification is the default safety net.
 - Boring substrate everywhere; leading-edge only where differentiation lives.
