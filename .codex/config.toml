@@ -18,6 +18,7 @@ wire_api = "responses"
 
 [features]
 apps = false
+context_management = { experimental_mode = true }
 goals = true
 prevent_idle_sleep = true
 
@@ -126,6 +127,12 @@ trust_level = "trusted"
 [projects."/Users/w/code/unstoppable-math"]
 trust_level = "trusted"
 
+[projects."/Users/w/code/chads"]
+trust_level = "trusted"
+
+[projects."/Users/w/Documents/ChatGPT/vest"]
+trust_level = "trusted"
+
 [shell_environment_policy]
 inherit = "core"
 
@@ -155,7 +162,7 @@ trusted_hash = "sha256:286313cc6d4ecbca4660a20a7a49d76caa2b604cbde51f911685b25ff
 [desktop]
 followUpQueueMode = "queue"
 dock-icon-preference = "app-default"
-conversationDetailMode = "STEPS_PROSE"
+conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = false
 
 [desktop.open-in-target-preferences]
@@ -187,10 +194,14 @@ NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = ""
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.901.31953"
-NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/w/.codex/plugins/cache/openai-bundled/browser/26.901.31953/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
+BROWSER_USE_CODEX_APP_VERSION = "26.901.51231"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"/Users/w/.codex/plugins/cache/openai-bundled/browser/26.901.51231/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 SKY_CUA_SERVICE_PATH = "/Users/w/.codex/computer-use/Codex Computer Use.app"
 CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
 
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
+
+[mcp_servers.robinhood-trading]
+url = "https://agent.robinhood.com/mcp/trading"
+enabled = false
