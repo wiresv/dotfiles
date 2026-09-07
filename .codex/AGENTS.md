@@ -76,5 +76,7 @@ Before writing or patching a file, inspect the exact text to be emitted and remo
 
 A repo's quality gate — linter ceilings, scripts/agent-verify, hooks, pre-push — outranks the task. A red gate means the work is not done: report the failing output; never claim success past it.
 
-- Fix the code, never the check. Getting to green by loosening a ceiling, adding a suppression (eslint-disable, ignore, per-file override), weakening the gate script or its hook wiring, or pushing with --no-verify is forbidden. Over-ceiling code means extract along a real seam — never restructure solely to game the number.
+- Fix code that violates a valid check. Getting to green by loosening a ceiling, adding a suppression (eslint-disable, ignore, per-file override), weakening the gate script or its hook wiring, or pushing with --no-verify is forbidden. Over-ceiling code means extract along a real seam — never restructure solely to game the number.
+- Correct a defective check only when explicit requirements or evidence independent of the implementation under test establish the intended behavior and demonstrate the defect. A failure or agreement with current output alone is insufficient. Resolve ambiguous expectations before changing the check.
+- Make the smallest check correction and preserve valid coverage and safeguards. Verify that the corrected check accepts a known compliant case and rejects a relevant violating case. Rerun the corrected check and affected gates; report the evidence and results.
 - All invalid: “the rule is too strict / just this once / disable it for this file / the ceiling blocks the fix / I'll re-enable it later”.
