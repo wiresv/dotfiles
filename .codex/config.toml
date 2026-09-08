@@ -1,7 +1,7 @@
 model_provider = "tfy"
 model = "gpt-6-astra"
 model_context_window = 272000
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 approval_policy = "never"
 approvals_reviewer = "user"
 sandbox_mode = "danger-full-access"
@@ -17,7 +17,7 @@ env_key = "TFY_API_KEY"
 wire_api = "responses"
 
 [features]
-apps = false
+apps = true
 context_management = { experimental_mode = true }
 goals = true
 prevent_idle_sleep = true
@@ -133,6 +133,144 @@ trust_level = "trusted"
 [projects."/Users/w/Documents/ChatGPT/vest"]
 trust_level = "trusted"
 
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r01/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r03/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r05/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r06/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r07/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r08/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r11/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r12/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r10/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r14/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r13/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r15/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r17/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r16/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r18/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r20/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r19/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r23/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r22/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r26/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r25/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r27/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r30/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r28/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r33/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r31/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r35/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r34/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r36/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r02/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r04/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r09/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r21/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r24/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r29/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r32/initial/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r06/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r05/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r09/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r07/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r08/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r23/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r22/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r24/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r27/followup/repo"]
+trust_level = "trusted"
+
+[projects."/Users/w/agent-instructions-eval-20260907/runs/r25/followup/repo"]
+trust_level = "trusted"
+
 [shell_environment_policy]
 inherit = "core"
 
@@ -147,6 +285,7 @@ status_line_use_colors = true
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4
+gpt-6-astra = 2
 
 [hooks.state]
 
@@ -159,6 +298,18 @@ trusted_hash = "sha256:c5a03baf7498ccebcdb7ffc55f76e2ea5e4df72be565b0bbc693c8b49
 [hooks.state."/Users/w/.codex/hooks.json:permission_request:0:0"]
 trusted_hash = "sha256:286313cc6d4ecbca4660a20a7a49d76caa2b604cbde51f911685b25ff75d7a90"
 
+[hooks.state."/Users/w/code/umath_1/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:d5d317e9f18f2d51908937a8228201255a5cdc62c1849fe27a556f13e9cc10ca"
+
+[hooks.state."/Users/w/code/umath_1/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:ff3f93c406831f4f73e980421c76588ca94ac175a90febf7be070839eb11bf25"
+
+[hooks.state."/Users/w/code/a-lp/.codex/hooks.json:post_tool_use:0:0"]
+trusted_hash = "sha256:25ceb33594717c26acd87d27a4a4cc4400b8d8a4abf62054f2f60ad1da65ed94"
+
+[hooks.state."/Users/w/code/a-lp/.codex/hooks.json:stop:0:0"]
+trusted_hash = "sha256:a0cb350ebf4ea28a6110207b30ab4ebbdb19529135787738ab2384129b721598"
+
 [desktop]
 followUpQueueMode = "queue"
 dock-icon-preference = "app-default"
@@ -170,12 +321,6 @@ global = "iterm2"
 
 [desktop.open-in-target-preferences.perPath]
 "/Users/w/Documents/New project" = "iterm2"
-
-[mcp_servers.computer-use]
-command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
-args = ["mcp"]
-cwd = "."
-enabled = false
 
 [mcp_servers.node_repl]
 args = []
@@ -204,4 +349,10 @@ url = "https://developers.openai.com/mcp"
 
 [mcp_servers.robinhood-trading]
 url = "https://agent.robinhood.com/mcp/trading"
+enabled = false
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
 enabled = false
